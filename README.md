@@ -21,7 +21,7 @@
 | 距离 | `distanceWalkingRunning` | m |
 | 活动卡路里 | `activeEnergyBurned` | kcal |
 | 心率采样 / 静息 | `heartRate` / `restingHeartRate` | count/min |
-| 睡眠 | `sleepAnalysis` | inBed / asleep / AsleepCore / AsleepDeep / AsleepREM |
+| 睡眠 | `sleepAnalysis` | inBed + 分期（awake / AsleepCore / AsleepDeep / AsleepREM），不写整晚 asleep 聚合 |
 | 血氧 | `oxygenSaturation` | **百分比 → 分数**（98% → 0.98） |
 | 体重 / 体脂 | `bodyMass` / `bodyFatPercentage` | 体脂百分比 → 分数 |
 | 运动 | `HKWorkout` | 关键词映射 `HKWorkoutActivityType` |
@@ -37,9 +37,18 @@ HealthMi/
   MiFitness/         小米云 API 的 Swift 移植（Crypto/Session/API/Models/Parser）
   Health/            HealthKit 授权、幂等写入器、数据映射
   Sync/              同步引擎、SwiftData 游标、后台任务
+  Support/           Info.plist、HealthKit entitlement
+  Resources/         资源（AppIcon 等）
 HealthMiTests/       加密向量 / 解析 / 映射 单测
 tools/               已验证的 Python 参考实现（mi-fitness-mcp-cn）
 ```
+
+## 前置条件
+
+- Xcode 16+（Swift 6.0）
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen)（`brew install xcodegen`）
+- iOS 17.0+（部署目标）
+- 真机写入 HealthKit 需要付费开发者账号
 
 ## 构建与测试
 
@@ -69,7 +78,7 @@ xcodebuild -project HealthMi.xcodeproj -scheme HealthMi \
 - **HealthKit 仅 iOS 可用**：原生 macOS App 无法写 HealthKit（需 Mac Catalyst + entitlement），因此本方案做成纯 iOS。
 - **后台同步**：已接入 `BGAppRefreshTask`，但模拟器不触发，需真机验证。
 - **真机部署**：把 `project.yml` 里的 `PRODUCT_BUNDLE_IDENTIFIER` 换成你自己的，并在 Xcode 中配置开发团队（HealthKit entitlement 需要付费开发者账号）。
-- **运动记录**：`HKWorkout` 构造器在 iOS 17 起标记废弃（建议 HKWorkoutBuilder），v1 仍用旧构造器，后续可升级。
+- **运动记录**：用 `HKWorkoutBuilder` 构建（iOS 17 起旧 `HKWorkout` 构造器已废弃）；不关联能量/距离样本，避免与每日活动总量重复计算，因此 Health 中运动记录只保留类型与时长，不显示独立热量/距离。
 
 ## 测试说明
 
