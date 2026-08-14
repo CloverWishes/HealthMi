@@ -1,0 +1,580 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00B6417CEF09B90A63A9E08C /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE42963B0DA22F1D3A79BD4 /* SyncEngine.swift */; };
+		1E1BBEC48FFED51E03E7AC6B /* MiParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03EB6FDE05824AFA45771995 /* MiParserTests.swift */; };
+		30E3C6360E48DE069365E232 /* BackgroundSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 958D958B50ADE261F3509087 /* BackgroundSync.swift */; };
+		469496648125A41CF5F603C7 /* MiAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC94990A6984263D47FA0FD8 /* MiAPIClient.swift */; };
+		474FB5785149C5AD226193ED /* MiWebLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EA0F17336B878185081390 /* MiWebLoginView.swift */; };
+		49FA8E6B4EC02E7FDA9FC4A2 /* HealthWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 713BFAFD2196EB4BC70D288D /* HealthWriter.swift */; };
+		73C9763657E92E9ED4E417A7 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028389EDD4D2D68BA73947B0 /* RootView.swift */; };
+		75A51F22447D3E7A04D76324 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8507D81902145FAE6F078136 /* DashboardView.swift */; };
+		8CA8D47BDDF2A41DF6A631BC /* TypeMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E40673AC22486334376C0C /* TypeMapperTests.swift */; };
+		8FEE0DFD3AA172522DCC4CBE /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87623416CD8EFC1BDBD2DF0F /* HealthKitManager.swift */; };
+		9EB94346E8064DEB591BC8A9 /* MiWebLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7904AA83ABA2A588A43824 /* MiWebLogin.swift */; };
+		A088A41ECFD8BFEE523CF0C6 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C5284FE104D38400CDEF2F /* OnboardingView.swift */; };
+		A47F941A95E58E7D1C0E64A2 /* MiWebLoginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B2D77AD6CC548500DB6E71 /* MiWebLoginTests.swift */; };
+		A74666C4D9A13A9DDB903F29 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF488E7F903066AD79D78D8 /* AppModel.swift */; };
+		AE9B8F3C1046BEF1A1E73170 /* MiCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47011AAE9C00D0D5D82B9E7E /* MiCryptoTests.swift */; };
+		B0E4E89B69AEF0874176C1CD /* TypeMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3657643C7BE5199C6B9A50 /* TypeMapper.swift */; };
+		B1BD0F78A72548F351F432A8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 93422A7058088DE46CF0F1E3 /* Assets.xcassets */; };
+		B842B19DBFC2FDB99D43EC24 /* SyncStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2192DFD76FD022C491DCAE0 /* SyncStateStore.swift */; };
+		C8137233A321FE206E40F028 /* CredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C344C2C58F98273F298F132 /* CredentialStore.swift */; };
+		CE0CB69C3C5B2FE8B0E651D3 /* HealthKitReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0E091439949F9C42F4F332 /* HealthKitReader.swift */; };
+		CF69B23220F444C6EE7A062B /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A116F75EE76107D338E60C0 /* WebKit.framework */; };
+		D6943590AD988A299FB694B2 /* MiParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE1F12733B158A3063A13166 /* MiParser.swift */; };
+		DEB86EA66F081A5FC4CC7850 /* MiSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B7D4B02356356C8416119B /* MiSession.swift */; };
+		E34BAC788F2E58F70D28C1C1 /* HealthMiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CFF6B2A1AD8794DD71E6A5B /* HealthMiApp.swift */; };
+		EA4077E2DD4663DC86280E87 /* MiModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B81AF32160C6915D81481FD /* MiModels.swift */; };
+		F1D08824EAE433674586E02A /* MiCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A63ED3AED8F3CE223BE655C /* MiCrypto.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E8B33FCBF34A99CB37B53397 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1DA48BED402E7C300E0B1DB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 606AFFE08F6F5FAD360861CE;
+			remoteInfo = HealthMi;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		01EA0F17336B878185081390 /* MiWebLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiWebLoginView.swift; sourceTree = "<group>"; };
+		028389EDD4D2D68BA73947B0 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		03EB6FDE05824AFA45771995 /* MiParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiParserTests.swift; sourceTree = "<group>"; };
+		22B7D4B02356356C8416119B /* MiSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiSession.swift; sourceTree = "<group>"; };
+		3B81AF32160C6915D81481FD /* MiModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiModels.swift; sourceTree = "<group>"; };
+		3BF488E7F903066AD79D78D8 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		3D0180E7F946B7FAA9377429 /* HealthMi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthMi.entitlements; sourceTree = "<group>"; };
+		47011AAE9C00D0D5D82B9E7E /* MiCryptoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiCryptoTests.swift; sourceTree = "<group>"; };
+		4C344C2C58F98273F298F132 /* CredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialStore.swift; sourceTree = "<group>"; };
+		6E3657643C7BE5199C6B9A50 /* TypeMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeMapper.swift; sourceTree = "<group>"; };
+		713BFAFD2196EB4BC70D288D /* HealthWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthWriter.swift; sourceTree = "<group>"; };
+		76B2D77AD6CC548500DB6E71 /* MiWebLoginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiWebLoginTests.swift; sourceTree = "<group>"; };
+		8507D81902145FAE6F078136 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		87623416CD8EFC1BDBD2DF0F /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		93422A7058088DE46CF0F1E3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		958D958B50ADE261F3509087 /* BackgroundSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSync.swift; sourceTree = "<group>"; };
+		96D20270176E08C23A44F5FA /* HealthMiTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HealthMiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9A116F75EE76107D338E60C0 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		9A63ED3AED8F3CE223BE655C /* MiCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiCrypto.swift; sourceTree = "<group>"; };
+		9CFF6B2A1AD8794DD71E6A5B /* HealthMiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthMiApp.swift; sourceTree = "<group>"; };
+		A2192DFD76FD022C491DCAE0 /* SyncStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStateStore.swift; sourceTree = "<group>"; };
+		AB0E091439949F9C42F4F332 /* HealthKitReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitReader.swift; sourceTree = "<group>"; };
+		AE1F12733B158A3063A13166 /* MiParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiParser.swift; sourceTree = "<group>"; };
+		BA7904AA83ABA2A588A43824 /* MiWebLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiWebLogin.swift; sourceTree = "<group>"; };
+		C0292E261C0563908DCEF274 /* HealthMi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HealthMi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D1C5284FE104D38400CDEF2F /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		E9E40673AC22486334376C0C /* TypeMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeMapperTests.swift; sourceTree = "<group>"; };
+		EC94990A6984263D47FA0FD8 /* MiAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiAPIClient.swift; sourceTree = "<group>"; };
+		FAE42963B0DA22F1D3A79BD4 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		455F1593BE253D0AD50B4574 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CF69B23220F444C6EE7A062B /* WebKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		17B94DB46BE96D589BA8E6E1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9A116F75EE76107D338E60C0 /* WebKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1E1C9D8EDADFA907F781C974 /* HealthMi */ = {
+			isa = PBXGroup;
+			children = (
+				520FB369F417A6EFEB821B76 /* App */,
+				C2B609513461DA4B4D279367 /* Health */,
+				BB5286A8B689B48DF61A02D2 /* MiFitness */,
+				35A4DAA2F6123A937A7161A8 /* Resources */,
+				496CEEFB28D7FC9195E7C639 /* Support */,
+				9D53BEC7B4544155388363B8 /* Sync */,
+			);
+			path = HealthMi;
+			sourceTree = "<group>";
+		};
+		1E268ED12B3089837DDDA467 = {
+			isa = PBXGroup;
+			children = (
+				1E1C9D8EDADFA907F781C974 /* HealthMi */,
+				4FC01B8A697BB571479CBB96 /* HealthMiTests */,
+				17B94DB46BE96D589BA8E6E1 /* Frameworks */,
+				58E484ABDFC575252F29EFCB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		35A4DAA2F6123A937A7161A8 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				93422A7058088DE46CF0F1E3 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		496CEEFB28D7FC9195E7C639 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				3D0180E7F946B7FAA9377429 /* HealthMi.entitlements */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		4FC01B8A697BB571479CBB96 /* HealthMiTests */ = {
+			isa = PBXGroup;
+			children = (
+				47011AAE9C00D0D5D82B9E7E /* MiCryptoTests.swift */,
+				03EB6FDE05824AFA45771995 /* MiParserTests.swift */,
+				76B2D77AD6CC548500DB6E71 /* MiWebLoginTests.swift */,
+				E9E40673AC22486334376C0C /* TypeMapperTests.swift */,
+			);
+			path = HealthMiTests;
+			sourceTree = "<group>";
+		};
+		520FB369F417A6EFEB821B76 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				3BF488E7F903066AD79D78D8 /* AppModel.swift */,
+				4C344C2C58F98273F298F132 /* CredentialStore.swift */,
+				8507D81902145FAE6F078136 /* DashboardView.swift */,
+				9CFF6B2A1AD8794DD71E6A5B /* HealthMiApp.swift */,
+				01EA0F17336B878185081390 /* MiWebLoginView.swift */,
+				D1C5284FE104D38400CDEF2F /* OnboardingView.swift */,
+				028389EDD4D2D68BA73947B0 /* RootView.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		58E484ABDFC575252F29EFCB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C0292E261C0563908DCEF274 /* HealthMi.app */,
+				96D20270176E08C23A44F5FA /* HealthMiTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9D53BEC7B4544155388363B8 /* Sync */ = {
+			isa = PBXGroup;
+			children = (
+				958D958B50ADE261F3509087 /* BackgroundSync.swift */,
+				FAE42963B0DA22F1D3A79BD4 /* SyncEngine.swift */,
+				A2192DFD76FD022C491DCAE0 /* SyncStateStore.swift */,
+			);
+			path = Sync;
+			sourceTree = "<group>";
+		};
+		BB5286A8B689B48DF61A02D2 /* MiFitness */ = {
+			isa = PBXGroup;
+			children = (
+				EC94990A6984263D47FA0FD8 /* MiAPIClient.swift */,
+				9A63ED3AED8F3CE223BE655C /* MiCrypto.swift */,
+				3B81AF32160C6915D81481FD /* MiModels.swift */,
+				AE1F12733B158A3063A13166 /* MiParser.swift */,
+				22B7D4B02356356C8416119B /* MiSession.swift */,
+				BA7904AA83ABA2A588A43824 /* MiWebLogin.swift */,
+			);
+			path = MiFitness;
+			sourceTree = "<group>";
+		};
+		C2B609513461DA4B4D279367 /* Health */ = {
+			isa = PBXGroup;
+			children = (
+				87623416CD8EFC1BDBD2DF0F /* HealthKitManager.swift */,
+				AB0E091439949F9C42F4F332 /* HealthKitReader.swift */,
+				713BFAFD2196EB4BC70D288D /* HealthWriter.swift */,
+				6E3657643C7BE5199C6B9A50 /* TypeMapper.swift */,
+			);
+			path = Health;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		56C47B460AA27C42BDCD6B6E /* HealthMiTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EAA44CA8676527C8E80DD519 /* Build configuration list for PBXNativeTarget "HealthMiTests" */;
+			buildPhases = (
+				A60A560C4A6C568EFE1AA494 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0EFC6B328D13206C64441865 /* PBXTargetDependency */,
+			);
+			name = HealthMiTests;
+			packageProductDependencies = (
+			);
+			productName = HealthMiTests;
+			productReference = 96D20270176E08C23A44F5FA /* HealthMiTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		606AFFE08F6F5FAD360861CE /* HealthMi */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4FEA0CC9C7608BEC6F07E44E /* Build configuration list for PBXNativeTarget "HealthMi" */;
+			buildPhases = (
+				AA82F82C261E1FE410907A47 /* Sources */,
+				9AB8249E688114347FF4BFA9 /* Resources */,
+				455F1593BE253D0AD50B4574 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HealthMi;
+			packageProductDependencies = (
+			);
+			productName = HealthMi;
+			productReference = C0292E261C0563908DCEF274 /* HealthMi.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A1DA48BED402E7C300E0B1DB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					56C47B460AA27C42BDCD6B6E = {
+						ProvisioningStyle = Automatic;
+					};
+					606AFFE08F6F5FAD360861CE = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = F78724213E03292E2B1DB0B1 /* Build configuration list for PBXProject "HealthMi" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1E268ED12B3089837DDDA467;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 58E484ABDFC575252F29EFCB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				606AFFE08F6F5FAD360861CE /* HealthMi */,
+				56C47B460AA27C42BDCD6B6E /* HealthMiTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9AB8249E688114347FF4BFA9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1BD0F78A72548F351F432A8 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A60A560C4A6C568EFE1AA494 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AE9B8F3C1046BEF1A1E73170 /* MiCryptoTests.swift in Sources */,
+				1E1BBEC48FFED51E03E7AC6B /* MiParserTests.swift in Sources */,
+				A47F941A95E58E7D1C0E64A2 /* MiWebLoginTests.swift in Sources */,
+				8CA8D47BDDF2A41DF6A631BC /* TypeMapperTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA82F82C261E1FE410907A47 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A74666C4D9A13A9DDB903F29 /* AppModel.swift in Sources */,
+				30E3C6360E48DE069365E232 /* BackgroundSync.swift in Sources */,
+				C8137233A321FE206E40F028 /* CredentialStore.swift in Sources */,
+				75A51F22447D3E7A04D76324 /* DashboardView.swift in Sources */,
+				8FEE0DFD3AA172522DCC4CBE /* HealthKitManager.swift in Sources */,
+				CE0CB69C3C5B2FE8B0E651D3 /* HealthKitReader.swift in Sources */,
+				E34BAC788F2E58F70D28C1C1 /* HealthMiApp.swift in Sources */,
+				49FA8E6B4EC02E7FDA9FC4A2 /* HealthWriter.swift in Sources */,
+				469496648125A41CF5F603C7 /* MiAPIClient.swift in Sources */,
+				F1D08824EAE433674586E02A /* MiCrypto.swift in Sources */,
+				EA4077E2DD4663DC86280E87 /* MiModels.swift in Sources */,
+				D6943590AD988A299FB694B2 /* MiParser.swift in Sources */,
+				DEB86EA66F081A5FC4CC7850 /* MiSession.swift in Sources */,
+				9EB94346E8064DEB591BC8A9 /* MiWebLogin.swift in Sources */,
+				474FB5785149C5AD226193ED /* MiWebLoginView.swift in Sources */,
+				A088A41ECFD8BFEE523CF0C6 /* OnboardingView.swift in Sources */,
+				73C9763657E92E9ED4E417A7 /* RootView.swift in Sources */,
+				00B6417CEF09B90A63A9E08C /* SyncEngine.swift in Sources */,
+				B842B19DBFC2FDB99D43EC24 /* SyncStateStore.swift in Sources */,
+				B0E4E89B69AEF0874176C1CD /* TypeMapper.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0EFC6B328D13206C64441865 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 606AFFE08F6F5FAD360861CE /* HealthMi */;
+			targetProxy = E8B33FCBF34A99CB37B53397 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1755F6BBE4C43765A22D264A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HealthMi/Support/HealthMi.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = HealthMi/Support/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.healthmi.HealthMi;
+				PRODUCT_NAME = HealthMi;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		616B5AFA266412FD23B86E4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HealthMi/Support/HealthMi.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = HealthMi/Support/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.healthmi.HealthMi;
+				PRODUCT_NAME = HealthMi;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9D1C670F71B9C2B553860551 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		A65E9FDB5B79C5730E838D52 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E3EF96E8CFBCC73F3E1B93FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.HealthMiTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HealthMi.app/HealthMi";
+			};
+			name = Release;
+		};
+		F83363EA9CC63BF292DCA7B4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.HealthMiTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HealthMi.app/HealthMi";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4FEA0CC9C7608BEC6F07E44E /* Build configuration list for PBXNativeTarget "HealthMi" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1755F6BBE4C43765A22D264A /* Debug */,
+				616B5AFA266412FD23B86E4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EAA44CA8676527C8E80DD519 /* Build configuration list for PBXNativeTarget "HealthMiTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F83363EA9CC63BF292DCA7B4 /* Debug */,
+				E3EF96E8CFBCC73F3E1B93FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F78724213E03292E2B1DB0B1 /* Build configuration list for PBXProject "HealthMi" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A65E9FDB5B79C5730E838D52 /* Debug */,
+				9D1C670F71B9C2B553860551 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A1DA48BED402E7C300E0B1DB /* Project object */;
+}

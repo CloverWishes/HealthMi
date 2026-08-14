@@ -1,0 +1,233 @@
+import Foundation
+
+enum MiAPIError: LocalizedError {
+    case notConnected
+    case api(code: Int, message: String?)
+    case paginationLimit
+    case cursorLoop
+    case invalidResponse(String)
+    case network(Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .notConnected:
+            return "尚未登录小米服务"
+        case .api(let code, let message):
+            return "小米 API 错误（code=\(code)）：\(message ?? "未知")"
+        case .paginationLimit:
+            return "分页超过安全上限"
+        case .cursorLoop:
+            return "分页游标循环，已终止"
+        case .invalidResponse(let detail):
+            return "响应解析失败：\(detail)"
+        case .network(let error):
+            return "网络错误：\(error.localizedDescription)"
+        }
+    }
+}
+
+/// 小米健康云数据客户端。Swift 移植自 `mi_fitness_cloud.MiFitnessCloudAdapter`。
+///
+/// 行为要点（与 Python 完全一致）：
+/// - 用 Cookie 登录换取 `ssecurity` 与重定向会话 Cookie；
+/// - 每个请求体用 `signed_nonce = SHA256(ssecurity||nonce)` 做 RC4 加密 + SHA1 签名；
+/// - 数据接口 `get_fitness_data_by_time` 按 key 分页拉取；
+/// - 运动记录走独立的 `get_sport_records_by_time`。
+actor MiAPIClient {
+    /// 中国区（cn）固定 +08:00。
+    static let cnTimeZone = TimeZone(secondsFromGMT: 8 * 3600)!
+
+    private let baseURL = "https://hlth.io.mi.com"
+    private let dataPath = "/app/v1/data/get_fitness_data_by_time"
+    private let sportRecordsPath = "/app/v1/data/get_sport_records_by_time"
+    private let maxPages = 200
+
+    private var state: MiSessionState?
+    private let session: URLSession
+
+    init() {
+        let config = URLSessionConfiguration.ephemeral
+        // 与 Python 一致：手动管理 Cookie，不交给 URLSession 的存储。
+        config.httpCookieStorage = nil
+        config.httpShouldSetCookies = false
+        config.timeoutIntervalForRequest = 30
+        self.session = URLSession(configuration: config)
+    }
+
+    var isConnected: Bool { state != nil }
+
+    /// 登录并建立会话。
+    func connect(userId: String, passToken: String) async throws {
+        self.state = try await MiSessionClient.login(userId: userId, passToken: passToken)
+    }
+
+    // MARK: - 请求签名与发送（对应 Python `_request`）
+
+    /// 按 Python 端字典插入顺序（start_time, end_time, key, limit?, next_key?）生成紧凑 JSON，
+    /// 保证与已验证实现逐字节一致（JSONSerialization 的键序不确定，不能使用）。
+    static func dataString(
+        startTime: Int, endTime: Int, key: String, limit: Int? = nil, nextKey: String? = nil
+    ) -> String {
+        var s = "{\"start_time\":\(startTime),\"end_time\":\(endTime),\"key\":\"\(key)\""
+        if let limit { s += ",\"limit\":\(limit)" }
+        if let nextKey { s += ",\"next_key\":\"\(nextKey)\"" }
+        s += "}"
+        return s
+    }
+
+    private func signedRequest(path: String, dataString: String) async throws -> [String: Any] {
+        guard let state else { throw MiAPIError.notConnected }
+
+        var form: [String: String] = ["data": dataString]
+        let nonce = MiCrypto.genNonce()
+        let signedNonce = MiCrypto.genSignedNonce(ssecurity: state.ssecurity, nonce: nonce)
+
+        // 第一次签名只含 data
+        form["rc4_hash__"] = MiCrypto.genSignature(
+            method: "POST", path: path, values: form, signedNonce: signedNonce
+        )
+
+        // 用 RC4 加密 data 与 rc4_hash__，再对加密值签名
+        var encrypted: [String: String] = [:]
+        for (key, value) in form {
+            let cipher = MiCrypto.rc4Crypt(key: signedNonce, payload: Array(value.utf8))
+            encrypted[key] = Data(cipher).base64EncodedString()
+        }
+        encrypted["signature"] = MiCrypto.genSignature(
+            method: "POST", path: path, values: encrypted, signedNonce: signedNonce
+        )
+        encrypted["_nonce"] = Data(nonce).base64EncodedString()
+
+        var request = URLRequest(url: URL(string: baseURL + path)!)
+        request.httpMethod = "POST"
+        request.setValue(state.cookies, forHTTPHeaderField: "Cookie")
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        // Python `urlencode`：值做百分号编码（Base64 中的 + / = 必须转义）
+        let body = encrypted
+            .map { "\($0.key)=\(percentEncode($0.value))" }
+            .joined(separator: "&")
+        request.httpBody = Data(body.utf8)
+
+        let data: Data
+        do {
+            (data, _) = try await session.data(for: request)
+        } catch {
+            throw MiAPIError.network(error)
+        }
+        guard let base64 = String(data: data, encoding: .utf8),
+              let cipher = Data(base64Encoded: base64)
+        else {
+            throw MiAPIError.invalidResponse("响应不是合法 Base64")
+        }
+
+        let plain = MiCrypto.rc4Crypt(key: signedNonce, payload: Array(cipher))
+        guard let obj = MiJSON.object(from: Data(plain)) else {
+            throw MiAPIError.invalidResponse("解密后不是合法 JSON")
+        }
+        let code = MiJSON.int(obj["code"]) ?? -1
+        guard code == 0 else {
+            throw MiAPIError.api(code: code, message: MiJSON.string(obj["message"]))
+        }
+        // 与 Python 一致：返回内层 result 字典（data_list / sport_records 都在里面）
+        return MiJSON.object(from: Data(plain))?["result"] as? [String: Any] ?? [:]
+    }
+
+    private func percentEncode(_ value: String) -> String {
+        value.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? value
+    }
+
+    // MARK: - 分页拉取
+
+    /// 按 key 拉取某时间区间的数据（对应 `_fetch_key`）。
+    func fetchData(key: String, startTime: Int, endTime: Int) async throws -> [MiItem] {
+        var items: [MiItem] = []
+        var nextKey: String?
+        var seen = Set<String>()
+        var page = 0
+        while true {
+            page += 1
+            guard page <= maxPages else { throw MiAPIError.paginationLimit }
+            let body = Self.dataString(
+                startTime: startTime, endTime: endTime, key: key, nextKey: nextKey
+            )
+            let result = try await signedRequest(path: dataPath, dataString: body)
+
+            if let list = result["data_list"] as? [[String: Any]] {
+                items.append(contentsOf: list.map(Self.makeItem))
+            }
+            let hasMore = MiJSON.bool(result["has_more"]) ?? false
+            let cursor = MiJSON.string(result["next_key"])
+            if !hasMore || cursor == nil { break }
+            if seen.contains(cursor!) { throw MiAPIError.cursorLoop }
+            seen.insert(cursor!)
+            nextKey = cursor
+        }
+        return items
+    }
+
+    /// 拉取运动记录（对应 `_fetch_sport_records_by_time`）。
+    func fetchSportRecords(startTime: Int, endTime: Int) async throws -> [MiItem] {
+        var items: [MiItem] = []
+        var nextKey: String?
+        var seen = Set<String>()
+        var page = 0
+        while true {
+            page += 1
+            guard page <= maxPages else { throw MiAPIError.paginationLimit }
+            let body = Self.dataString(
+                startTime: startTime, endTime: endTime, key: "sport", limit: 50, nextKey: nextKey
+            )
+            let result = try await signedRequest(path: sportRecordsPath, dataString: body)
+
+            if let list = result["sport_records"] as? [[String: Any]] {
+                items.append(contentsOf: list.map(Self.makeItem))
+            }
+            let hasMore = MiJSON.bool(result["has_more"]) ?? false
+            let cursor = MiJSON.string(result["next_key"])
+            if !hasMore || cursor == nil { break }
+            if seen.contains(cursor!) { throw MiAPIError.cursorLoop }
+            seen.insert(cursor!)
+            nextKey = cursor
+        }
+        return items
+    }
+
+    // MARK: - 时间换算（中国区 +08:00）
+
+    /// 某日历日 00:00:00(+08:00) 的时间戳。
+    static func dayStartEpoch(of day: Date) -> Int {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = cnTimeZone
+        let start = cal.startOfDay(for: day)
+        return Int(start.timeIntervalSince1970)
+    }
+
+    /// 某日历日 23:59:59(+08:00) 的时间戳。
+    static func dayEndEpoch(of day: Date) -> Int {
+        dayStartEpoch(of: day) + 86_399
+    }
+
+    // MARK: - 原始条目提取
+
+    private static func makeItem(_ raw: [String: Any]) -> MiItem {
+        var valueData: Data?
+        if let string = raw["value"] as? String {
+            valueData = Data(string.utf8)
+        } else if let dict = raw["value"] as? [String: Any],
+                  let data = try? JSONSerialization.data(withJSONObject: dict) {
+            valueData = data
+        } else if let arr = raw["value"] as? [Any],
+                  let data = try? JSONSerialization.data(withJSONObject: arr) {
+            valueData = data
+        }
+        return MiItem(
+            time: MiJSON.int(raw["time"]),
+            zoneOffset: MiJSON.int(raw["zone_offset"]),
+            zoneName: MiJSON.string(raw["zone_name"]),
+            sid: MiJSON.string(raw["sid"]),
+            key: MiJSON.string(raw["key"]),
+            category: MiJSON.string(raw["category"]),
+            valueData: valueData
+        )
+    }
+}

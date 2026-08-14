@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# Xcode / XcodeGen
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+build/
+build-device/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# 本地工具/规划笔记
+.zcode/
+
+# 内置 Python 参考工具（mi-fitness-mcp-cn）
+tools/mi-fitness-mcp-cn/.venv/
+tools/mi-fitness-mcp-cn/__pycache__/
+tools/mi-fitness-mcp-cn/**/__pycache__/
+*.pyc
+tools/mi-fitness-mcp-cn/.git/
+tools/mi-fitness-mcp-cn/.env
+tools/mi-fitness-mcp-cn/config.json
