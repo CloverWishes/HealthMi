@@ -13,12 +13,10 @@ actor HealthWriter {
     }
 
     /// 该类型在 `[start, end]` 内已写入的 externalID 集合。
+    /// 使用软边界（不限制 strictStart/strictEnd），确保跨越窗口起点的睡眠会话不会被漏掉。
     func existingExternalIDs(ofType type: HKSampleType, start: Date, end: Date) async throws -> Set<String> {
         let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-            HKQuery.predicateForSamples(
-                withStart: start, end: end,
-                options: [.strictStartDate, .strictEndDate]
-            ),
+            HKQuery.predicateForSamples(withStart: start, end: end),
             HKQuery.predicateForObjects(withMetadataKey: HKMetadataKeyExternalUUID),
         ])
         var ids = Set<String>()
@@ -47,6 +45,7 @@ actor HealthWriter {
 
     /// 用 `HKWorkoutBuilder` 构建并保存一条运动记录。
     /// 保留 externalUUID metadata（builder 支持 addMetadata），继续用于去重。
+    /// 若草稿包含心率数据，创建关联心率样本并挂载到运动记录上。
     func saveWorkout(_ draft: TypeMapper.WorkoutDraft) async throws -> HKWorkout {
         let config = HKWorkoutConfiguration()
         config.activityType = draft.activityType
@@ -58,6 +57,41 @@ actor HealthWriter {
             guard let workout = try await builder.finishWorkout() else {
                 throw HealthWriterError.workoutBuildFailed
             }
+
+            // 关联心率样本（平均/最大），用 externalUUID 前缀确保去重
+            var hrSamples: [HKQuantitySample] = []
+            let hrType = HKQuantityType(.heartRate)
+            let hrUnit = HKUnit.count().unitDivided(by: .minute())
+            if let avg = draft.avgHeartRateBpm, avg > 0 {
+                hrSamples.append(HKQuantitySample(
+                    type: hrType,
+                    quantity: HKQuantity(unit: hrUnit, doubleValue: Double(avg)),
+                    start: draft.start, end: draft.end,
+                    metadata: [HKMetadataKeyExternalUUID: "\(draft.externalUUID)_avg_hr"]
+                ))
+            }
+            if let max = draft.maxHeartRateBpm, max > 0 {
+                hrSamples.append(HKQuantitySample(
+                    type: hrType,
+                    quantity: HKQuantity(unit: hrUnit, doubleValue: Double(max)),
+                    start: draft.start, end: draft.end,
+                    metadata: [HKMetadataKeyExternalUUID: "\(draft.externalUUID)_max_hr"]
+                ))
+            }
+            if !hrSamples.isEmpty {
+                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+                    store.add(hrSamples, to: workout) { success, error in
+                        if let error {
+                            continuation.resume(throwing: error)
+                        } else if !success {
+                            continuation.resume(throwing: HealthWriterError.workoutBuildFailed)
+                        } else {
+                            continuation.resume()
+                        }
+                    }
+                }
+            }
+
             return workout
         } catch {
             builder.discardWorkout()

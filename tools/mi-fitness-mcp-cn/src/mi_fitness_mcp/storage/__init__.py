@@ -29,6 +29,7 @@ class Database:
             db_path: Path to SQLite database file
         """
         self.db_path = Path(db_path)
+        self._connection: sqlite3.Connection | None = None
         self._init_db()
 
     def _init_db(self) -> None:
@@ -267,13 +268,19 @@ class Database:
 
     @contextmanager
     def _get_connection(self):
-        """Get database connection with row factory."""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        try:
-            yield conn
-        finally:
-            conn.close()
+        """Get the reusable database connection with row factory (WAL enabled).
+
+        The connection is created lazily once per Database instance and reused
+        across all inserts/queries instead of being opened and closed for every
+        operation. WAL mode improves concurrency and write throughput for the
+        high-volume sample tables (e.g. heart_rate).
+        """
+        if self._connection is None:
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA journal_mode=WAL")
+            self._connection = conn
+        yield self._connection
 
     def insert_daily_activity(self, activity: DailyActivity) -> bool:
         """Insert or update daily activity record.
@@ -482,6 +489,63 @@ class Database:
             )
             conn.commit()
             return cursor.rowcount > 0
+
+    def bulk_insert_heart_rate_samples(self, samples: list[HeartRateSample]) -> tuple[int, int]:
+        """Insert or update many heart-rate samples in a single transaction.
+
+        Uses ``executemany`` wrapped in one ``BEGIN...COMMIT`` so that a 7-day
+        heart-rate chunk (potentially thousands of samples) hits the database
+        once instead of once per row.
+
+        Returns:
+            A ``(added, updated)`` tuple. ``updated`` counts ids that already
+            existed before this bulk insert.
+        """
+        if not samples:
+            return 0, 0
+        sql = """
+            INSERT INTO heart_rate_samples (
+                id, provider, source_type, source_record_id, user_id, device_id,
+                timezone, collected_at, timestamp, bpm, sample_type
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+                timezone = excluded.timezone,
+                collected_at = excluded.collected_at,
+                timestamp = excluded.timestamp,
+                bpm = excluded.bpm,
+                sample_type = excluded.sample_type,
+                updated_at = CURRENT_TIMESTAMP
+        """
+        params = [
+            (
+                sample.id,
+                sample.provider,
+                sample.source_type,
+                sample.source_record_id,
+                sample.user_id,
+                sample.device_id,
+                sample.timezone,
+                sample.collected_at.isoformat() if sample.collected_at else None,
+                sample.timestamp.isoformat(),
+                sample.bpm,
+                sample.sample_type,
+            )
+            for sample in samples
+        ]
+        ids = tuple(sample.id for sample in samples)
+        placeholders = ",".join("?" for _ in ids)
+        with self._get_connection() as conn:
+            existing = conn.execute(
+                f"SELECT COUNT(*) FROM heart_rate_samples WHERE id IN ({placeholders})",
+                ids,
+            ).fetchone()[0]
+            try:
+                conn.executemany(sql, params)
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            return len(samples) - existing, existing
 
     def insert_spo2_sample(self, sample: SpO2Sample) -> bool:
         with self._get_connection() as conn:

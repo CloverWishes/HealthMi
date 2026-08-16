@@ -26,6 +26,10 @@
 	<array>
 		<string>fetch</string>
 	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.healthmi.HealthMi.sync</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIApplicationSceneManifest</key>

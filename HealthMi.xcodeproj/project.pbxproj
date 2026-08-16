@@ -8,29 +8,42 @@
 
 /* Begin PBXBuildFile section */
 		00B6417CEF09B90A63A9E08C /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE42963B0DA22F1D3A79BD4 /* SyncEngine.swift */; };
+		0A354162109CDE65AA26CC7C /* SyncEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84D3AB8A04983B253EB8C2D /* SyncEngineTests.swift */; };
 		1E1BBEC48FFED51E03E7AC6B /* MiParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03EB6FDE05824AFA45771995 /* MiParserTests.swift */; };
+		275026CA85AC231464B4C0A7 /* StressStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8E5A617ADC0F1D321F07B42 /* StressStore.swift */; };
 		30E3C6360E48DE069365E232 /* BackgroundSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 958D958B50ADE261F3509087 /* BackgroundSync.swift */; };
+		39392FE6F057C695C299F592 /* SyncHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319B7AE4B010DE68B4A9B4E8 /* SyncHistoryView.swift */; };
+		3B5C38396C47D2B794AB7ECD /* DataExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BD4E363B360409586F110F /* DataExporter.swift */; };
+		429AC37EF4C3D2AEBDADB563 /* TrendChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 351CE95207B3A629BAFEAB8B /* TrendChartView.swift */; };
 		469496648125A41CF5F603C7 /* MiAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC94990A6984263D47FA0FD8 /* MiAPIClient.swift */; };
 		474FB5785149C5AD226193ED /* MiWebLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01EA0F17336B878185081390 /* MiWebLoginView.swift */; };
 		49FA8E6B4EC02E7FDA9FC4A2 /* HealthWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 713BFAFD2196EB4BC70D288D /* HealthWriter.swift */; };
+		4C589E48498704B55741C8D1 /* SyncIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8DA208F9D9961EAD948D596 /* SyncIntent.swift */; };
+		55B73A839E41DE6C16DFAA35 /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C0AAB8A8E69A2D9066312A /* AppLog.swift */; };
 		73C9763657E92E9ED4E417A7 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028389EDD4D2D68BA73947B0 /* RootView.swift */; };
 		75A51F22447D3E7A04D76324 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8507D81902145FAE6F078136 /* DashboardView.swift */; };
 		8CA8D47BDDF2A41DF6A631BC /* TypeMapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9E40673AC22486334376C0C /* TypeMapperTests.swift */; };
 		8FEE0DFD3AA172522DCC4CBE /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87623416CD8EFC1BDBD2DF0F /* HealthKitManager.swift */; };
+		961972462B2822830BF4E174 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 600AB680690567A717BABBAD /* NotificationManager.swift */; };
 		9EB94346E8064DEB591BC8A9 /* MiWebLogin.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA7904AA83ABA2A588A43824 /* MiWebLogin.swift */; };
 		A088A41ECFD8BFEE523CF0C6 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1C5284FE104D38400CDEF2F /* OnboardingView.swift */; };
 		A47F941A95E58E7D1C0E64A2 /* MiWebLoginTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B2D77AD6CC548500DB6E71 /* MiWebLoginTests.swift */; };
 		A74666C4D9A13A9DDB903F29 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF488E7F903066AD79D78D8 /* AppModel.swift */; };
+		A938F88BF26BF29DFEBC688E /* SyncStateStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3621E0CB2D9DCF7D415B0A89 /* SyncStateStoreTests.swift */; };
 		AE9B8F3C1046BEF1A1E73170 /* MiCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47011AAE9C00D0D5D82B9E7E /* MiCryptoTests.swift */; };
 		B0E4E89B69AEF0874176C1CD /* TypeMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E3657643C7BE5199C6B9A50 /* TypeMapper.swift */; };
 		B1BD0F78A72548F351F432A8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 93422A7058088DE46CF0F1E3 /* Assets.xcassets */; };
 		B842B19DBFC2FDB99D43EC24 /* SyncStateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2192DFD76FD022C491DCAE0 /* SyncStateStore.swift */; };
+		C5B2047B22E68C1FADBC9FBB /* DayDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 357201E03D37C07CC38F9D40 /* DayDetailView.swift */; };
 		C8137233A321FE206E40F028 /* CredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C344C2C58F98273F298F132 /* CredentialStore.swift */; };
 		CE0CB69C3C5B2FE8B0E651D3 /* HealthKitReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0E091439949F9C42F4F332 /* HealthKitReader.swift */; };
 		CF69B23220F444C6EE7A062B /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A116F75EE76107D338E60C0 /* WebKit.framework */; };
 		D6943590AD988A299FB694B2 /* MiParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE1F12733B158A3063A13166 /* MiParser.swift */; };
+		D8DF600E483FE99D5BB9EA63 /* MigrationPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA2A833A9B953A9D0AE4F1C /* MigrationPlan.swift */; };
 		DEB86EA66F081A5FC4CC7850 /* MiSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22B7D4B02356356C8416119B /* MiSession.swift */; };
 		E34BAC788F2E58F70D28C1C1 /* HealthMiApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CFF6B2A1AD8794DD71E6A5B /* HealthMiApp.swift */; };
+		E5C22D99EF84596B7377DB65 /* SyncLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18B42438CD50B3EF106D0F3E /* SyncLogEntry.swift */; };
+		EA0AB65B4AC5B748DB441A36 /* MiRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 485407572753FCA4057BEF8A /* MiRegion.swift */; };
 		EA4077E2DD4663DC86280E87 /* MiModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B81AF32160C6915D81481FD /* MiModels.swift */; };
 		F1D08824EAE433674586E02A /* MiCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A63ED3AED8F3CE223BE655C /* MiCrypto.swift */; };
 /* End PBXBuildFile section */
@@ -49,12 +62,21 @@
 		01EA0F17336B878185081390 /* MiWebLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiWebLoginView.swift; sourceTree = "<group>"; };
 		028389EDD4D2D68BA73947B0 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		03EB6FDE05824AFA45771995 /* MiParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiParserTests.swift; sourceTree = "<group>"; };
+		18B42438CD50B3EF106D0F3E /* SyncLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncLogEntry.swift; sourceTree = "<group>"; };
 		22B7D4B02356356C8416119B /* MiSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiSession.swift; sourceTree = "<group>"; };
+		319B7AE4B010DE68B4A9B4E8 /* SyncHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncHistoryView.swift; sourceTree = "<group>"; };
+		351CE95207B3A629BAFEAB8B /* TrendChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrendChartView.swift; sourceTree = "<group>"; };
+		357201E03D37C07CC38F9D40 /* DayDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayDetailView.swift; sourceTree = "<group>"; };
+		3621E0CB2D9DCF7D415B0A89 /* SyncStateStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStateStoreTests.swift; sourceTree = "<group>"; };
+		36BD4E363B360409586F110F /* DataExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataExporter.swift; sourceTree = "<group>"; };
+		39C0AAB8A8E69A2D9066312A /* AppLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLog.swift; sourceTree = "<group>"; };
 		3B81AF32160C6915D81481FD /* MiModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiModels.swift; sourceTree = "<group>"; };
 		3BF488E7F903066AD79D78D8 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		3D0180E7F946B7FAA9377429 /* HealthMi.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthMi.entitlements; sourceTree = "<group>"; };
 		47011AAE9C00D0D5D82B9E7E /* MiCryptoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiCryptoTests.swift; sourceTree = "<group>"; };
+		485407572753FCA4057BEF8A /* MiRegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiRegion.swift; sourceTree = "<group>"; };
 		4C344C2C58F98273F298F132 /* CredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialStore.swift; sourceTree = "<group>"; };
+		600AB680690567A717BABBAD /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		6E3657643C7BE5199C6B9A50 /* TypeMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeMapper.swift; sourceTree = "<group>"; };
 		713BFAFD2196EB4BC70D288D /* HealthWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthWriter.swift; sourceTree = "<group>"; };
 		76B2D77AD6CC548500DB6E71 /* MiWebLoginTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiWebLoginTests.swift; sourceTree = "<group>"; };
@@ -67,11 +89,15 @@
 		9A63ED3AED8F3CE223BE655C /* MiCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiCrypto.swift; sourceTree = "<group>"; };
 		9CFF6B2A1AD8794DD71E6A5B /* HealthMiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthMiApp.swift; sourceTree = "<group>"; };
 		A2192DFD76FD022C491DCAE0 /* SyncStateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStateStore.swift; sourceTree = "<group>"; };
+		A8E5A617ADC0F1D321F07B42 /* StressStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StressStore.swift; sourceTree = "<group>"; };
 		AB0E091439949F9C42F4F332 /* HealthKitReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitReader.swift; sourceTree = "<group>"; };
 		AE1F12733B158A3063A13166 /* MiParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiParser.swift; sourceTree = "<group>"; };
 		BA7904AA83ABA2A588A43824 /* MiWebLogin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiWebLogin.swift; sourceTree = "<group>"; };
 		C0292E261C0563908DCEF274 /* HealthMi.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HealthMi.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1C5284FE104D38400CDEF2F /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		D8DA208F9D9961EAD948D596 /* SyncIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncIntent.swift; sourceTree = "<group>"; };
+		DEA2A833A9B953A9D0AE4F1C /* MigrationPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationPlan.swift; sourceTree = "<group>"; };
+		E84D3AB8A04983B253EB8C2D /* SyncEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngineTests.swift; sourceTree = "<group>"; };
 		E9E40673AC22486334376C0C /* TypeMapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypeMapperTests.swift; sourceTree = "<group>"; };
 		EC94990A6984263D47FA0FD8 /* MiAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiAPIClient.swift; sourceTree = "<group>"; };
 		FAE42963B0DA22F1D3A79BD4 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
@@ -131,7 +157,9 @@
 		496CEEFB28D7FC9195E7C639 /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				39C0AAB8A8E69A2D9066312A /* AppLog.swift */,
 				3D0180E7F946B7FAA9377429 /* HealthMi.entitlements */,
+				600AB680690567A717BABBAD /* NotificationManager.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -142,6 +170,8 @@
 				47011AAE9C00D0D5D82B9E7E /* MiCryptoTests.swift */,
 				03EB6FDE05824AFA45771995 /* MiParserTests.swift */,
 				76B2D77AD6CC548500DB6E71 /* MiWebLoginTests.swift */,
+				E84D3AB8A04983B253EB8C2D /* SyncEngineTests.swift */,
+				3621E0CB2D9DCF7D415B0A89 /* SyncStateStoreTests.swift */,
 				E9E40673AC22486334376C0C /* TypeMapperTests.swift */,
 			);
 			path = HealthMiTests;
@@ -153,10 +183,15 @@
 				3BF488E7F903066AD79D78D8 /* AppModel.swift */,
 				4C344C2C58F98273F298F132 /* CredentialStore.swift */,
 				8507D81902145FAE6F078136 /* DashboardView.swift */,
+				36BD4E363B360409586F110F /* DataExporter.swift */,
+				357201E03D37C07CC38F9D40 /* DayDetailView.swift */,
 				9CFF6B2A1AD8794DD71E6A5B /* HealthMiApp.swift */,
 				01EA0F17336B878185081390 /* MiWebLoginView.swift */,
 				D1C5284FE104D38400CDEF2F /* OnboardingView.swift */,
 				028389EDD4D2D68BA73947B0 /* RootView.swift */,
+				319B7AE4B010DE68B4A9B4E8 /* SyncHistoryView.swift */,
+				D8DA208F9D9961EAD948D596 /* SyncIntent.swift */,
+				351CE95207B3A629BAFEAB8B /* TrendChartView.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -174,7 +209,10 @@
 			isa = PBXGroup;
 			children = (
 				958D958B50ADE261F3509087 /* BackgroundSync.swift */,
+				DEA2A833A9B953A9D0AE4F1C /* MigrationPlan.swift */,
+				A8E5A617ADC0F1D321F07B42 /* StressStore.swift */,
 				FAE42963B0DA22F1D3A79BD4 /* SyncEngine.swift */,
+				18B42438CD50B3EF106D0F3E /* SyncLogEntry.swift */,
 				A2192DFD76FD022C491DCAE0 /* SyncStateStore.swift */,
 			);
 			path = Sync;
@@ -187,6 +225,7 @@
 				9A63ED3AED8F3CE223BE655C /* MiCrypto.swift */,
 				3B81AF32160C6915D81481FD /* MiModels.swift */,
 				AE1F12733B158A3063A13166 /* MiParser.swift */,
+				485407572753FCA4057BEF8A /* MiRegion.swift */,
 				22B7D4B02356356C8416119B /* MiSession.swift */,
 				BA7904AA83ABA2A588A43824 /* MiWebLogin.swift */,
 			);
@@ -300,6 +339,8 @@
 				AE9B8F3C1046BEF1A1E73170 /* MiCryptoTests.swift in Sources */,
 				1E1BBEC48FFED51E03E7AC6B /* MiParserTests.swift in Sources */,
 				A47F941A95E58E7D1C0E64A2 /* MiWebLoginTests.swift in Sources */,
+				0A354162109CDE65AA26CC7C /* SyncEngineTests.swift in Sources */,
+				A938F88BF26BF29DFEBC688E /* SyncStateStoreTests.swift in Sources */,
 				8CA8D47BDDF2A41DF6A631BC /* TypeMapperTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -308,10 +349,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55B73A839E41DE6C16DFAA35 /* AppLog.swift in Sources */,
 				A74666C4D9A13A9DDB903F29 /* AppModel.swift in Sources */,
 				30E3C6360E48DE069365E232 /* BackgroundSync.swift in Sources */,
 				C8137233A321FE206E40F028 /* CredentialStore.swift in Sources */,
 				75A51F22447D3E7A04D76324 /* DashboardView.swift in Sources */,
+				3B5C38396C47D2B794AB7ECD /* DataExporter.swift in Sources */,
+				C5B2047B22E68C1FADBC9FBB /* DayDetailView.swift in Sources */,
 				8FEE0DFD3AA172522DCC4CBE /* HealthKitManager.swift in Sources */,
 				CE0CB69C3C5B2FE8B0E651D3 /* HealthKitReader.swift in Sources */,
 				E34BAC788F2E58F70D28C1C1 /* HealthMiApp.swift in Sources */,
@@ -320,13 +364,21 @@
 				F1D08824EAE433674586E02A /* MiCrypto.swift in Sources */,
 				EA4077E2DD4663DC86280E87 /* MiModels.swift in Sources */,
 				D6943590AD988A299FB694B2 /* MiParser.swift in Sources */,
+				EA0AB65B4AC5B748DB441A36 /* MiRegion.swift in Sources */,
 				DEB86EA66F081A5FC4CC7850 /* MiSession.swift in Sources */,
 				9EB94346E8064DEB591BC8A9 /* MiWebLogin.swift in Sources */,
 				474FB5785149C5AD226193ED /* MiWebLoginView.swift in Sources */,
+				D8DF600E483FE99D5BB9EA63 /* MigrationPlan.swift in Sources */,
+				961972462B2822830BF4E174 /* NotificationManager.swift in Sources */,
 				A088A41ECFD8BFEE523CF0C6 /* OnboardingView.swift in Sources */,
 				73C9763657E92E9ED4E417A7 /* RootView.swift in Sources */,
+				275026CA85AC231464B4C0A7 /* StressStore.swift in Sources */,
 				00B6417CEF09B90A63A9E08C /* SyncEngine.swift in Sources */,
+				39392FE6F057C695C299F592 /* SyncHistoryView.swift in Sources */,
+				4C589E48498704B55741C8D1 /* SyncIntent.swift in Sources */,
+				E5C22D99EF84596B7377DB65 /* SyncLogEntry.swift in Sources */,
 				B842B19DBFC2FDB99D43EC24 /* SyncStateStore.swift in Sources */,
+				429AC37EF4C3D2AEBDADB563 /* TrendChartView.swift in Sources */,
 				B0E4E89B69AEF0874176C1CD /* TypeMapper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -520,7 +572,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.HealthMiTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.healthmi.HealthMiTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HealthMi.app/HealthMi";
@@ -537,7 +589,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.HealthMiTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.healthmi.HealthMiTests;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HealthMi.app/HealthMi";

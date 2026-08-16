@@ -1,9 +1,13 @@
 import BackgroundTasks
 import Foundation
+import os
 
 /// BGAppRefreshTask 后台同步（模拟器不会触发，需真机运行验证）。
 enum BackgroundSync {
-    static let taskIdentifier = "com.example.HealthMi.sync"
+    static let taskIdentifier = "com.healthmi.HealthMi.sync"
+
+    /// 当前后台同步 Task 引用，用于 expirationHandler 取消。
+    @MainActor private static var syncTask: Task<Void, Never>?
 
     @MainActor
     static func register(syncHandler: @escaping @MainActor () async -> Void) {
@@ -14,9 +18,13 @@ enum BackgroundSync {
             }
             schedule()
             refreshTask.expirationHandler = {
+                // 系统即将挂起进程，取消正在进行的同步
+                Task { @MainActor in
+                    syncTask?.cancel()
+                }
                 refreshTask.setTaskCompleted(success: false)
             }
-            Task { @MainActor in
+            syncTask = Task { @MainActor in
                 await syncHandler()
                 refreshTask.setTaskCompleted(success: true)
             }
@@ -26,6 +34,10 @@ enum BackgroundSync {
     static func schedule() {
         let request = BGAppRefreshTaskRequest(identifier: taskIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
-        try? BGTaskScheduler.shared.submit(request)
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            AppLog.backgroundSync.error("后台同步调度失败：\(error.localizedDescription)")
+        }
     }
 }

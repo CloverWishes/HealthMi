@@ -21,6 +21,7 @@ class SyncService:
         db: Database,
         default_lookback_days: int = 30,
         chunk_days: int = 7,
+        min_request_interval_seconds: float = 0.2,
     ):
         """Initialize sync service.
 
@@ -32,6 +33,7 @@ class SyncService:
         self.db = db
         self.default_lookback_days = default_lookback_days
         self.chunk_days = chunk_days
+        self.min_request_interval_seconds = min_request_interval_seconds
         self._sync_lock = asyncio.Lock()
         self._sync_active = False
 
@@ -158,6 +160,9 @@ class SyncService:
                 }
             )
             cursor = chunk_end + timedelta(days=1)
+            # Throttle between chunk syncs to respect the upstream rate limit.
+            if cursor <= end_dt and self.min_request_interval_seconds > 0:
+                await asyncio.sleep(self.min_request_interval_seconds)
 
         return {
             "status": "ok",
@@ -217,13 +222,15 @@ class SyncService:
 
         elif data_type == "heart_rate":
             records = self.adapter.iter_heart_rate(start_date, end_date)
+            # Collect the whole chunk and persist in a single transaction
+            # (executemany) instead of one connection/commit per sample.
+            samples: list[Any] = []
             async for sample in self._iterate_records(records):
-                if self.db.insert_heart_rate_sample(sample):
-                    added += 1
-                else:
-                    updated += 1
-                if last_ts is None or sample.timestamp > last_ts:
+                samples.append(sample)
+                if last_ts is None or (sample.timestamp and sample.timestamp > last_ts):
                     last_ts = sample.timestamp
+            if samples:
+                added, updated = self.db.bulk_insert_heart_rate_samples(samples)
 
         elif data_type == "spo2":
             records = self.adapter.iter_spo2(start_date, end_date)
