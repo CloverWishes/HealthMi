@@ -106,11 +106,16 @@ def _gen_signature(method: str, path: str, values: dict[str, str], signed_nonce:
 
 class MiFitnessCloudAdapter(DataAdapter):
     def __init__(
-        self, user_id: str | None = None, pass_token: str | None = None, region: str = "ru"
+        self,
+        user_id: str | None = None,
+        pass_token: str | None = None,
+        region: str = "ru",
+        min_request_interval_seconds: float = 0.2,
     ):
         self.user_id = user_id
         self.pass_token = pass_token
         self.region = region
+        self.min_request_interval_seconds = min_request_interval_seconds
         self._cookies = ""
         self._ssecurity = b""
         self._client: httpx.AsyncClient | None = None
@@ -277,6 +282,11 @@ class MiFitnessCloudAdapter(DataAdapter):
         end_dt = datetime.fromisoformat(end_date + "T23:59:59").replace(tzinfo=tz)
         return int(start_dt.timestamp()), int(end_dt.timestamp())
 
+    async def _throttle(self) -> None:
+        """Pause between API calls to stay under the request rate limit."""
+        if self.min_request_interval_seconds > 0:
+            await asyncio.sleep(self.min_request_interval_seconds)
+
     async def _fetch_key(
         self, key: str, start_date: str, end_date: str, region: str | None = None
     ) -> list[dict]:
@@ -313,6 +323,7 @@ class MiFitnessCloudAdapter(DataAdapter):
                 raise RuntimeError("Mi Fitness pagination cursor loop detected")
             seen_keys.add(candidate)
             next_key = candidate
+            await self._throttle()
 
         return items
 
@@ -400,6 +411,7 @@ class MiFitnessCloudAdapter(DataAdapter):
                 raise RuntimeError("Mi Fitness sport pagination cursor loop detected")
             seen_keys.add(candidate)
             next_key = candidate
+            await self._throttle()
 
         return items
 
@@ -417,16 +429,16 @@ class MiFitnessCloudAdapter(DataAdapter):
             return "light"
 
     def _optional_float(self, value: Any) -> float | None:
+        # 0 is a legitimate value; only return None when the key is missing/None.
         if value is None:
             return None
-        parsed = float(value)
-        return None if parsed == 0 else parsed
+        return float(value)
 
     def _optional_int(self, value: Any) -> int | None:
+        # 0 is a legitimate value; only return None when the key is missing/None.
         if value is None:
             return None
-        parsed = int(float(value))
-        return None if parsed == 0 else parsed
+        return int(float(value))
 
     async def iter_daily_activity(
         self,
@@ -443,6 +455,7 @@ class MiFitnessCloudAdapter(DataAdapter):
                 "steps": 0,
                 "distance_m": 0.0,
                 "active_kcal": 0.0,
+                "total_kcal": 0.0,
                 "timezone": "UTC",
                 "collected_at": None,
             }
@@ -461,6 +474,7 @@ class MiFitnessCloudAdapter(DataAdapter):
             ):
                 daily[date_str]["collected_at"] = collected_at
 
+        await self._throttle()
         calorie_records = await self._fetch_key("calories", start_date, end_date)
         calorie_totals: dict[str, float] = defaultdict(float)
         for item in calorie_records:
@@ -476,7 +490,10 @@ class MiFitnessCloudAdapter(DataAdapter):
                 daily[date_str]["collected_at"] = collected_at
 
         for date_str, total in calorie_totals.items():
-            daily[date_str]["active_kcal"] = total
+            # The "calories" key reports total calories (BMR + activity).
+            # Store it separately instead of overwriting the step-derived
+            # active kcal value.
+            daily[date_str]["total_kcal"] = total
 
         for date_str, values in sorted(daily.items()):
             yield DailyActivity(
@@ -490,6 +507,7 @@ class MiFitnessCloudAdapter(DataAdapter):
                 steps=int(values["steps"]),
                 distance_m=float(values["distance_m"]),
                 active_kcal=float(values["active_kcal"]),
+                total_kcal=float(values["total_kcal"]),
             )
 
     async def iter_sleep_sessions(
@@ -677,6 +695,7 @@ class MiFitnessCloudAdapter(DataAdapter):
                 sample_type=sample_type,
             )
 
+        await self._throttle()
         resting_records = await self._fetch_key("resting_heart_rate", start_date, end_date)
         for item in resting_records:
             payload = self._parse_value(item)

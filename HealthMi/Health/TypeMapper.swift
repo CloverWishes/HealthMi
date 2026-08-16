@@ -4,7 +4,7 @@ import Foundation
 /// 小米模型 → HealthKit 对象映射与单位换算。
 /// 关键换算：百分比一律转分数（血氧 98% → 0.98，体脂 20% → 0.20）。
 enum TypeMapper {
-    static let cnTimeZone = TimeZone(secondsFromGMT: 8 * 3600)!
+    static var regionTimeZone: TimeZone { MiRegion.current.timeZone }
     static let kilogram = HKUnit.gramUnit(with: .kilo)
 
     // MARK: - 日常活动（整日区间）
@@ -91,21 +91,43 @@ enum TypeMapper {
         )
     }
 
-    /// 体重（kg）与体脂（百分比 → 分数）。
+    /// 体重（kg）、体脂（百分比 → 分数）、BMI、肌肉量、基础代谢。
     static func bodyMeasurementSamples(_ measurement: MiBodyMeasurement) -> [HKQuantitySample] {
         var samples: [HKQuantitySample] = []
+        let ts = Int(measurement.timestamp.timeIntervalSince1970)
         if measurement.weightKg > 0 {
             samples.append(quantity(
                 .bodyMass, unit: kilogram, value: measurement.weightKg,
                 start: measurement.timestamp, end: measurement.timestamp,
-                uuid: "mi_fitness_weight_\(Int(measurement.timestamp.timeIntervalSince1970))"
+                uuid: "mi_fitness_weight_\(ts)"
             ))
         }
         if let fat = measurement.bodyFatPct, fat > 0 {
             samples.append(quantity(
                 .bodyFatPercentage, unit: .percent(), value: fat / 100.0,
                 start: measurement.timestamp, end: measurement.timestamp,
-                uuid: "mi_fitness_body_fat_\(Int(measurement.timestamp.timeIntervalSince1970))"
+                uuid: "mi_fitness_body_fat_\(ts)"
+            ))
+        }
+        if let bmi = measurement.bmi, bmi > 0 {
+            samples.append(quantity(
+                .bodyMassIndex, unit: .count(), value: bmi,
+                start: measurement.timestamp, end: measurement.timestamp,
+                uuid: "mi_fitness_bmi_\(ts)"
+            ))
+        }
+        if let muscle = measurement.muscleMassKg, muscle > 0 {
+            samples.append(quantity(
+                .leanBodyMass, unit: kilogram, value: muscle,
+                start: measurement.timestamp, end: measurement.timestamp,
+                uuid: "mi_fitness_lean_mass_\(ts)"
+            ))
+        }
+        if let bmr = measurement.basalMetabolismKcal, bmr > 0 {
+            samples.append(quantity(
+                .basalEnergyBurned, unit: .kilocalorie(), value: Double(bmr),
+                start: measurement.timestamp, end: measurement.timestamp,
+                uuid: "mi_fitness_bmr_\(ts)"
             ))
         }
         return samples
@@ -150,13 +172,16 @@ enum TypeMapper {
     // MARK: - 运动
 
     /// 运动草稿：用 `HKWorkoutBuilder` 构建（iOS 17 起旧构造器已废弃）。
-    /// 注意：不关联能量/距离样本，避免与每日活动总量重复计算；
-    /// 因此 Health 里运动记录保留类型/时长，但不显示独立热量/距离。
+    /// 心率样本作为运动关联样本写入（不与日总计重复计数）。
+    /// 不关联能量/距离样本，避免与每日活动总量重复计算；
+    /// 因此 Health 里运动记录保留类型/时长/心率，但不显示独立热量/距离。
     struct WorkoutDraft: Sendable {
         let externalUUID: String
         let activityType: HKWorkoutActivityType
         let start: Date
         let end: Date
+        let avgHeartRateBpm: Int?
+        let maxHeartRateBpm: Int?
     }
 
     static func workoutDraft(_ workout: MiWorkout) -> WorkoutDraft? {
@@ -165,7 +190,9 @@ enum TypeMapper {
             externalUUID: "mi_fitness_workout_\(workout.workoutId)",
             activityType: mapActivityType(workout.activityType),
             start: workout.startAt,
-            end: workout.endAt
+            end: workout.endAt,
+            avgHeartRateBpm: workout.avgHeartRateBpm,
+            maxHeartRateBpm: workout.maxHeartRateBpm
         )
     }
 
@@ -218,7 +245,7 @@ enum TypeMapper {
 
     private static let calendar: Calendar = {
         var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = cnTimeZone
+        cal.timeZone = regionTimeZone
         return cal
     }()
 
@@ -226,7 +253,7 @@ enum TypeMapper {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
-        formatter.timeZone = cnTimeZone
+        formatter.timeZone = regionTimeZone
         return formatter.date(from: string)
     }
 

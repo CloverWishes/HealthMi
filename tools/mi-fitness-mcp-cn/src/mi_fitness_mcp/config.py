@@ -22,13 +22,11 @@ class Config(BaseModel):
     timezone: str = Field(default="UTC")
     database_path: Path = Field(default_factory=_default_database_path)
     logs_path: Path = Field(default_factory=_default_logs_path)
-    auto_sync_on_start: bool = True
-    stale_after_minutes: int = 60
-    store_raw_payloads: bool = True
     default_lookback_days: int = Field(default=30, ge=1, le=3650)
     sync_chunk_days: int = Field(default=7, ge=1, le=90)
     http_timeout_seconds: float = Field(default=20.0, gt=0, le=120)
     request_retries: int = Field(default=3, ge=1, le=10)
+    min_request_interval_seconds: float = Field(default=0.2, gt=0, le=10)
     health_check_timeout_seconds: float = Field(default=10.0, gt=0, le=60)
     sync_type_timeout_seconds: float = Field(default=180.0, gt=0, le=3600)
     max_pages: int = Field(default=200, ge=1, le=5000)

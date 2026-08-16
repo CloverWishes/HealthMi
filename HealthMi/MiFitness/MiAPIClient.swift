@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 enum MiAPIError: LocalizedError {
     case notConnected
@@ -7,6 +8,7 @@ enum MiAPIError: LocalizedError {
     case cursorLoop
     case invalidResponse(String)
     case network(Error)
+    case http(Int)
 
     var errorDescription: String? {
         switch self {
@@ -22,7 +24,24 @@ enum MiAPIError: LocalizedError {
             return "响应解析失败：\(detail)"
         case .network(let error):
             return "网络错误：\(error.localizedDescription)"
+        case .http(let code):
+            return "HTTP 错误：\(code)"
         }
+    }
+
+    /// 是否可重试（网络错误、429/5xx 类 HTTP 错误）。
+    var isRetriable: Bool {
+        switch self {
+        case .network: return true
+        case .http(let code): return code == 429 || (500...599).contains(code)
+        default: return false
+        }
+    }
+
+    /// 是否认证错误（passToken 过期/无效，code=70016），不可重试。
+    var isAuthError: Bool {
+        if case .api(let code, _) = self, code == 70016 { return true }
+        return false
     }
 }
 
@@ -34,10 +53,16 @@ enum MiAPIError: LocalizedError {
 /// - 数据接口 `get_fitness_data_by_time` 按 key 分页拉取；
 /// - 运动记录走独立的 `get_sport_records_by_time`。
 actor MiAPIClient {
-    /// 中国区（cn）固定 +08:00。
-    static let cnTimeZone = TimeZone(secondsFromGMT: 8 * 3600)!
+    /// 当前区域的时区（用于日边界计算）。
+    static var regionTimeZone: TimeZone { MiRegion.current.timeZone }
 
-    private let baseURL = "https://hlth.io.mi.com"
+
+    /// 最多重试次数（不含首次请求）。
+    private let maxRetries = 3
+    /// 分页请求间隔（纳秒），避免高频请求触发小米限流。
+    private let pageDelayNs: UInt64 = 200_000_000
+
+    private var baseURL: String { MiRegion.current.baseURL }
     private let dataPath = "/app/v1/data/get_fitness_data_by_time"
     private let sportRecordsPath = "/app/v1/data/get_sport_records_by_time"
     private let maxPages = 200
@@ -75,7 +100,34 @@ actor MiAPIClient {
         return s
     }
 
+    /// 带重试的签名请求：网络错误和 429/5xx HTTP 错误自动重试，
+    /// 认证错误（code=70016）不重试直接抛出。
     private func signedRequest(path: String, dataString: String) async throws -> [String: Any] {
+        let retries = maxRetries
+        var lastError: Error?
+        for attempt in 0...retries {
+            if attempt > 0 {
+                // 指数退避：1s → 2s → 4s，加 0–200ms 随机抖动
+                let baseDelay = UInt64(pow(2.0, Double(attempt - 1))) * 1_000_000_000
+                let jitter = UInt64.random(in: 0...200_000_000)
+                AppLog.apiClient.info("重试 \(attempt)/\(retries) path=\(path)")
+                try? await Task.sleep(nanoseconds: baseDelay + jitter)
+            }
+            do {
+                return try await signedRequestOnce(path: path, dataString: dataString)
+            } catch let error as MiAPIError {
+                if error.isAuthError || !error.isRetriable {
+                    throw error
+                }
+                lastError = error
+            } catch {
+                lastError = error
+            }
+        }
+        throw lastError ?? MiAPIError.invalidResponse("重试耗尽")
+    }
+
+    private func signedRequestOnce(path: String, dataString: String) async throws -> [String: Any] {
         guard let state else { throw MiAPIError.notConnected }
 
         var form: [String: String] = ["data": dataString]
@@ -109,10 +161,15 @@ actor MiAPIClient {
         request.httpBody = Data(body.utf8)
 
         let data: Data
+        let response: URLResponse
         do {
-            (data, _) = try await session.data(for: request)
+            (data, response) = try await session.data(for: request)
         } catch {
             throw MiAPIError.network(error)
+        }
+        if let http = response as? HTTPURLResponse, http.statusCode != 200 {
+            AppLog.apiClient.error("HTTP \(http.statusCode) path=\(path)")
+            throw MiAPIError.http(http.statusCode)
         }
         guard let base64 = String(data: data, encoding: .utf8),
               let cipher = Data(base64Encoded: base64)
@@ -161,6 +218,8 @@ actor MiAPIClient {
             if seen.contains(cursor!) { throw MiAPIError.cursorLoop }
             seen.insert(cursor!)
             nextKey = cursor
+            // 分页请求间隔，避免高频请求触发小米限流
+            try? await Task.sleep(nanoseconds: pageDelayNs)
         }
         return items
     }
@@ -188,6 +247,8 @@ actor MiAPIClient {
             if seen.contains(cursor!) { throw MiAPIError.cursorLoop }
             seen.insert(cursor!)
             nextKey = cursor
+            // 分页请求间隔，避免高频请求触发小米限流
+            try? await Task.sleep(nanoseconds: pageDelayNs)
         }
         return items
     }
@@ -197,7 +258,7 @@ actor MiAPIClient {
     /// 某日历日 00:00:00(+08:00) 的时间戳。
     static func dayStartEpoch(of day: Date) -> Int {
         var cal = Calendar(identifier: .gregorian)
-        cal.timeZone = cnTimeZone
+        cal.timeZone = Self.regionTimeZone
         let start = cal.startOfDay(for: day)
         return Int(start.timeIntervalSince1970)
     }

@@ -56,12 +56,12 @@ final class TypeMapperTests: XCTestCase {
     func testBodyMeasurementConversion() throws {
         let ts = day(2026, 8, 10, hour: 8)
         let measurement = MiBodyMeasurement(
-            timestamp: ts, weightKg: 70.5, bmi: 23.1, bodyFatPct: 20, muscleMassKg: nil,
-            waterPct: nil, boneMassKg: nil, visceralFatScore: nil,
-            basalMetabolismKcal: nil, metabolicAge: nil
+            timestamp: ts, weightKg: 70.5, bmi: 23.1, bodyFatPct: 20, muscleMassKg: 30.2,
+            waterPct: 55, boneMassKg: nil, visceralFatScore: nil,
+            basalMetabolismKcal: 1620, metabolicAge: 28
         )
         let samples = TypeMapper.bodyMeasurementSamples(measurement)
-        XCTAssertEqual(samples.count, 2)
+        XCTAssertEqual(samples.count, 5)
 
         let weight = try XCTUnwrap(samples.first { $0.quantityType == HKQuantityType(.bodyMass) })
         XCTAssertEqual(weight.quantity.doubleValue(for: .gramUnit(with: .kilo)), 70.5)
@@ -69,6 +69,15 @@ final class TypeMapperTests: XCTestCase {
         let fat = try XCTUnwrap(samples.first { $0.quantityType == HKQuantityType(.bodyFatPercentage) })
         // 20% → 0.20
         XCTAssertEqual(fat.quantity.doubleValue(for: .percent()), 0.20, accuracy: 0.0001)
+
+        let bmi = try XCTUnwrap(samples.first { $0.quantityType == HKQuantityType(.bodyMassIndex) })
+        XCTAssertEqual(bmi.quantity.doubleValue(for: .count()), 23.1, accuracy: 0.0001)
+
+        let muscle = try XCTUnwrap(samples.first { $0.quantityType == HKQuantityType(.leanBodyMass) })
+        XCTAssertEqual(muscle.quantity.doubleValue(for: .gramUnit(with: .kilo)), 30.2)
+
+        let bmr = try XCTUnwrap(samples.first { $0.quantityType == HKQuantityType(.basalEnergyBurned) })
+        XCTAssertEqual(bmr.quantity.doubleValue(for: .kilocalorie()), 1620)
     }
 
     func testSleepSamples() throws {

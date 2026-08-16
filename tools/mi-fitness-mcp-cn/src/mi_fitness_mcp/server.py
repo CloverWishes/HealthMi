@@ -632,11 +632,16 @@ async def main():
             adapter.http_timeout = config.http_timeout_seconds
             adapter.request_retries = config.request_retries
             adapter.max_pages = config.max_pages
+            adapter.min_request_interval_seconds = config.min_request_interval_seconds
             # Do not connect here: MCP stdio must become available even when Xiaomi
             # authentication or networking is slow. Status/sync tools connect on demand.
     if adapter:
         sync_service = SyncService(
-            adapter, db, config.default_lookback_days, config.sync_chunk_days
+            adapter,
+            db,
+            config.default_lookback_days,
+            config.sync_chunk_days,
+            min_request_interval_seconds=config.min_request_interval_seconds,
         )
         query_service = QueryService(db, adapter.get_user_id() or "unknown")
     else:

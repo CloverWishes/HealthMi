@@ -21,9 +21,28 @@ actor SyncEngine {
     /// 增量同步时与上次游标的重叠天数（弥补迟到数据）。
     private let overlapDays = 1
 
+    /// sleep 数据缓存：sleep、respiratoryRate、hrv 三个类型共享同一份睡眠原始数据，
+    /// 避免同一次同步中把 sleep key 下载三遍。按 (startTime, endTime) 命中缓存。
+    private var sleepCache: (startTime: Int, endTime: Int, items: [MiItem])?
+
     init(client: MiAPIClient = MiAPIClient(), writer: HealthWriter = HealthWriter()) {
         self.client = client
         self.writer = writer
+    }
+
+    /// 清除内部缓存，在一次同步会话开始前调用。
+    func clearCache() {
+        sleepCache = nil
+    }
+
+    /// 获取睡眠原始数据，带缓存（相同时间窗口只下载一次）。
+    private func fetchSleepData(startTime: Int, endTime: Int) async throws -> [MiItem] {
+        if let cache = sleepCache, cache.startTime == startTime, cache.endTime == endTime {
+            return cache.items
+        }
+        let items = try await client.fetchData(key: "sleep", startTime: startTime, endTime: endTime)
+        sleepCache = (startTime, endTime, items)
+        return items
     }
 
     /// 登录并校验凭据。
@@ -101,6 +120,37 @@ actor SyncEngine {
         return SyncOutcome(type: type, fetched: fetched, added: added, highWater: now)
     }
 
+    /// 压力数据同步：从云端拉取 stress key，返回解析后的压力样本。
+    /// 压力数据无 HealthKit 对应类型，由 AppModel 写入 SwiftData。
+    /// - Returns: (压力样本列表, 同步结果摘要)
+    func syncStress(
+        highWater: Date?, backfillDays: Int, forceBackfill: Bool = false
+    ) async throws -> (samples: [MiStressSample], outcome: SyncOutcome) {
+        let (start, now, startTime, endTime) = syncWindow(
+            highWater: highWater, backfillDays: backfillDays, forceBackfill: forceBackfill
+        )
+        let items = try await client.fetchData(key: "stress", startTime: startTime, endTime: endTime)
+        let samples = MiParser.stressSamples(items)
+        return (samples, SyncOutcome(type: .stress, fetched: samples.count, added: 0, highWater: now))
+    }
+
+    // MARK: - 窗口计算
+
+    func syncWindow(
+        highWater: Date?, backfillDays: Int, forceBackfill: Bool
+    ) -> (start: Date, end: Date, startTime: Int, endTime: Int) {
+        let now = Date()
+        let start: Date
+        if forceBackfill {
+            start = Calendar.current.date(byAdding: .day, value: -backfillDays, to: now) ?? now
+        } else if let highWater {
+            start = Calendar.current.date(byAdding: .day, value: -overlapDays, to: highWater) ?? highWater
+        } else {
+            start = Calendar.current.date(byAdding: .day, value: -backfillDays, to: now) ?? now
+        }
+        return (start, now, MiAPIClient.dayStartEpoch(of: start), MiAPIClient.dayEndEpoch(of: now))
+    }
+
     // MARK: - 取数与映射
 
     private struct HKGroup {
@@ -125,7 +175,7 @@ actor SyncEngine {
             return groupBySampleType(samples)
 
         case .sleep:
-            let items = try await client.fetchData(key: "sleep", startTime: startTime, endTime: endTime)
+            let items = try await fetchSleepData(startTime: startTime, endTime: endTime)
             let samples = MiParser.sleepSessions(items).flatMap(TypeMapper.sleepSamples)
             return groupBySampleType(samples)
 
@@ -136,14 +186,14 @@ actor SyncEngine {
 
         case .respiratoryRate:
             // 呼吸频率数据来自睡眠记录的 avg_breath，按睡眠时段各写一条样本
-            let items = try await client.fetchData(key: "sleep", startTime: startTime, endTime: endTime)
+            let items = try await fetchSleepData(startTime: startTime, endTime: endTime)
             let samples = MiParser.respiratoryRateSamples(items)
                 .compactMap(TypeMapper.respiratoryRateSample)
             return groupBySampleType(samples)
 
         case .hrv:
             // HRV 数据来自睡眠记录的 avg_hrv / hrv_median，按睡眠时段各写一条样本
-            let items = try await client.fetchData(key: "sleep", startTime: startTime, endTime: endTime)
+            let items = try await fetchSleepData(startTime: startTime, endTime: endTime)
             let samples = MiParser.hrvSamples(items).compactMap(TypeMapper.hrvSample)
             return groupBySampleType(samples)
 
@@ -151,6 +201,10 @@ actor SyncEngine {
             let items = try await client.fetchData(key: "weight", startTime: startTime, endTime: endTime)
             let samples = MiParser.bodyMeasurements(items).flatMap(TypeMapper.bodyMeasurementSamples)
             return groupBySampleType(samples)
+
+        case .stress:
+            // 压力数据不走 HealthKit，由 syncStress 方法处理
+            return []
 
         case .workouts:
             // 不会走到这里：sync() 已将运动路由到 syncWorkouts（HKWorkoutBuilder 专用）
@@ -172,6 +226,13 @@ actor SyncEngine {
             if forceBackfill {
                 if existing.contains(draft.externalUUID) {
                     try await writer.delete(ofType: workoutType, externalIDs: [draft.externalUUID])
+                    // 同时删除关联心率样本（avg_hr / max_hr）
+                    let hrType = HKQuantityType(.heartRate) as HKObjectType
+                    let hrIDs: Set<String> = [
+                        "\(draft.externalUUID)_avg_hr",
+                        "\(draft.externalUUID)_max_hr",
+                    ]
+                    try await writer.delete(ofType: hrType, externalIDs: hrIDs)
                 }
                 _ = try await writer.saveWorkout(draft)
                 added += 1

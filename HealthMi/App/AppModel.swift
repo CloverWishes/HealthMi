@@ -28,8 +28,19 @@ final class AppModel {
     var statusMessage = ""
     var lastError: String?
     var outcomes: [SyncDataType: SyncOutcome] = [:]
-    /// 最近 7 天数据概览（从 HealthKit 读回，用于 App 内回显）。
+    /// 最近 N 天数据概览（从 HealthKit 读回，用于 App 内回显）。
     var summary: HealthSummary?
+    /// 最近 N 天每日趋势（用于 Charts）。
+    var trends: [DailyTrend] = []
+    /// 当前正在同步的类型索引和总数（用于进度显示）。
+    var currentSyncIndex: Int = 0
+    var totalSyncCount: Int = 0
+
+    /// 同步进度文字，如 "正在同步 3/9"。
+    var syncProgressText: String? {
+        guard isSyncing, totalSyncCount > 0 else { return nil }
+        return "正在同步 \(currentSyncIndex)/\(totalSyncCount)"
+    }
 
     /// 小米凭据是否已过期/无效（需要用户重新登录获取新 token）。
     var authNeedsRefresh = false
@@ -42,6 +53,7 @@ final class AppModel {
     // MARK: - 初始化 / 凭据
 
     func bootstrap() {
+        CredentialStore.migrateIfNeeded()
         loadEnabledTypes()
         if let cred = CredentialStore.load() {
             isConfigured = true
@@ -92,13 +104,19 @@ final class AppModel {
         refreshHealthKitStatus()
     }
 
-    func disconnect() {
+    func disconnect(modelContext: ModelContext? = nil) {
         engine = nil
         CredentialStore.delete()
         isConfigured = false
         connected = false
         accountID = ""
         outcomes = [:]
+        // 清除同步游标和压力记录，防止切换账号时新账号继承上一个账号的数据
+        if let modelContext {
+            SyncStateStore.clearAll(in: modelContext)
+            StressStore.clearAll(in: modelContext)
+            SyncLogStore.clearAll(in: modelContext)
+        }
     }
 
     // MARK: - HealthKit
@@ -122,9 +140,10 @@ final class AppModel {
 
     // MARK: - 同步
 
-    /// 读取最近 N 天健康摘要用于 App 内回显。
+    /// 读取最近 N 天健康摘要和趋势数据用于 App 内回显。
     func refreshSummary(days: Int = 7) async {
         summary = await HealthKitReader.summary(days: days)
+        trends = await HealthKitReader.trendSeries(days: days)
     }
 
     /// 若存在尚未请求过授权的类型（如后来新增的呼吸频率），先弹出 HealthKit 授权。
@@ -142,14 +161,23 @@ final class AppModel {
         }
     }
 
-    /// - Parameter forceBackfill: 为 true 时忽略增量游标，按 `backfillDays` 重新回填历史。
-    func syncAll(modelContext: ModelContext, forceBackfill: Bool = false) async {
+    /// - Parameters:
+    ///   - forceBackfill: 为 true 时忽略增量游标，按 `backfillDays` 重新回填历史。
+    ///   - isBackground: 是否为后台同步触发（失败时发送本地通知）。
+    func syncAll(modelContext: ModelContext, forceBackfill: Bool = false, isBackground: Bool = false) async {
         isSyncing = true
         lastError = nil
         defer { isSyncing = false }
 
         // 新增类型（如呼吸频率）可能还没授权，先补齐授权，否则写入会被 HealthKit 拒绝
         await ensureHealthKitAuthorization()
+        // 检查用户是否在系统设置中撤销了权限
+        refreshHealthKitStatus()
+        guard healthKitAuthorized else {
+            lastError = "HealthKit 写入权限未授权，请在 设置 → 健康 → 数据访问 中允许 HealthMi"
+            statusMessage = "❌ HealthKit 权限未授权"
+            return
+        }
 
         do {
             try await ensureEngine()
@@ -161,31 +189,77 @@ final class AppModel {
 
         var messages: [String] = []
         let types = SyncDataType.allCases.filter { enabledTypes.contains($0) }
+        totalSyncCount = types.count
+        currentSyncIndex = 0
+        await engine?.clearCache()
         for type in types {
+            currentSyncIndex += 1
+            // 后台同步被系统取消时，尽早退出
+            if Task.isCancelled { break }
             let highWater = SyncStateStore.state(for: type, in: modelContext)?.lastSyncedEnd
             do {
-                let outcome = try await engine?.sync(
-                    type: type, highWater: highWater, backfillDays: backfillDays,
-                    forceBackfill: forceBackfill
-                )
-                if let outcome {
-                    SyncStateStore.record(
-                        type: type, highWater: outcome.highWater,
-                        added: outcome.added, in: modelContext
+                if type == .stress {
+                    // 压力数据不走 HealthKit，走 SwiftData
+                    let result = try await engine?.syncStress(
+                        highWater: highWater, backfillDays: backfillDays,
+                        forceBackfill: forceBackfill
                     )
-                    outcomes[type] = outcome
-                    messages.append("\(type.displayName) +\(outcome.added)")
+                    if let result {
+                        if forceBackfill {
+                            StressStore.clearAll(in: modelContext)
+                        }
+                        let added = StressStore.save(samples: result.samples, in: modelContext)
+                        let outcome = SyncOutcome(
+                            type: .stress, fetched: result.samples.count,
+                            added: added, highWater: result.outcome.highWater
+                        )
+                        SyncStateStore.record(
+                            type: .stress, highWater: outcome.highWater,
+                            added: added, in: modelContext
+                        )
+                        outcomes[.stress] = outcome
+                        messages.append("压力 +\(added)")
+                        SyncLogStore.append(
+                            type: .stress, fetched: result.samples.count,
+                            added: added, success: true, in: modelContext
+                        )
+                    }
+                } else {
+                    let outcome = try await engine?.sync(
+                        type: type, highWater: highWater, backfillDays: backfillDays,
+                        forceBackfill: forceBackfill
+                    )
+                    if let outcome {
+                        SyncStateStore.record(
+                            type: type, highWater: outcome.highWater,
+                            added: outcome.added, in: modelContext
+                        )
+                        outcomes[type] = outcome
+                        messages.append("\(type.displayName) +\(outcome.added)")
+                        SyncLogStore.append(
+                            type: type, fetched: outcome.fetched,
+                            added: outcome.added, success: true, in: modelContext
+                        )
+                    }
                 }
             } catch {
                 let message = "\(type.displayName)：\(Self.describeSyncError(error))"
                 lastError = message
                 messages.append("\(type.displayName) ❌")
+                SyncLogStore.append(
+                    type: type, fetched: 0, added: 0,
+                    success: false, errorMessage: Self.describeSyncError(error), in: modelContext
+                )
             }
         }
         statusMessage = messages.joined(separator: "  ")
         refreshHealthKitStatus()
         // 同步完成后刷新 App 内数据概览
         await refreshSummary()
+        // 后台同步失败时发送本地通知
+        if isBackground, let lastError {
+            await NotificationManager.notifySyncFailure(lastError)
+        }
     }
 
     /// 把同步错误转成可读信息，健康权限被拒时给出设置引导。

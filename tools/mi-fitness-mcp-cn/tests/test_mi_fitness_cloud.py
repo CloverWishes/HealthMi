@@ -15,10 +15,13 @@ async def _collect(async_iterable):
 
 def test_optional_number_helpers():
     adapter = MiFitnessCloudAdapter(user_id="u1", pass_token="p1")
-    assert adapter._optional_float(0) is None
+    # 0 is a legitimate value and must not be coerced to None.
+    assert adapter._optional_float(0) == 0.0
     assert adapter._optional_float("1.5") == 1.5
-    assert adapter._optional_int(0) is None
+    assert adapter._optional_float(None) is None
+    assert adapter._optional_int(0) == 0
     assert adapter._optional_int("7") == 7
+    assert adapter._optional_int(None) is None
 
 
 def test_parse_value_dict_and_json():
@@ -66,7 +69,11 @@ async def test_iter_daily_activity_aggregates_steps_and_calories(monkeypatch):
     assert len(items) == 1
     assert items[0].steps == 30
     assert items[0].distance_m == 24
-    assert items[0].active_kcal == 12
+    # Active kcal is derived from the "steps" payload calories (1 + 2).
+    assert items[0].active_kcal == 3
+    # Total kcal comes from the "calories" API key (5 + 7) and must not
+    # overwrite the step-derived active kcal.
+    assert items[0].total_kcal == 12
 
 
 @pytest.mark.asyncio
