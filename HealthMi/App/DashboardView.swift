@@ -241,7 +241,7 @@ struct TrendsTabView: View {
 
 // MARK: - 设置页（Tab）
 
-/// 设置页：账号与权限、同步类别、数据导出、退出登录。
+/// 设置页：账号与权限、同步类别与起始日期、数据导出、退出登录。
 struct SettingsTabView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.modelContext) private var modelContext
@@ -252,6 +252,10 @@ struct SettingsTabView: View {
     @AppStorage("theme_tint") private var themeTint = ""
     @State private var showWebLogin = false
     @State private var exportFileURL: URL?
+    /// 正在编辑起始日期的类别（nil 表示不显示编辑弹窗）。
+    @State private var editingStartType: SyncDataType?
+    /// 正在显示起始日期说明气泡的类别（nil 表示不显示）。
+    @State private var startDateHelpType: SyncDataType?
     /// 正在显示类别说明气泡的类别（nil 表示不显示）。
     @State private var categoryHelpType: SyncDataType?
 
@@ -287,6 +291,9 @@ struct SettingsTabView: View {
                 Section {
                     ForEach(SyncDataType.allCases) { type in
                         categoryRow(type)
+                        if model.isTypeEnabled(type) {
+                            startDateRow(type)
+                        }
                     }
                 } header: {
                     Text("同步类别")
@@ -368,6 +375,14 @@ struct SettingsTabView: View {
                     ShareSheet(items: [exportFileURL])
                 }
             }
+            .sheet(item: $editingStartType) { type in
+                StartDateEditor(
+                    typeName: type.displayName,
+                    initial: model.startDate(for: type)
+                ) { newDate in
+                    model.setStartDate(newDate, for: type)
+                }
+            }
         }
     }
 
@@ -423,6 +438,48 @@ struct SettingsTabView: View {
             .accessibilityLabel(type.displayName)
         }
     }
+
+    /// 某类别的「起始日期」行：显示当前值（不限 / 具体日期），点击整行弹出编辑面板；
+    /// 左侧 ⓘ 图标点击后弹出说明气泡。
+    private func startDateRow(_ type: SyncDataType) -> some View {
+        let stored = model.startDate(for: type)
+        return HStack(spacing: 6) {
+            Text("起始日期")
+                .foregroundStyle(.secondary)
+            Button {
+                startDateHelpType = type
+            } label: {
+                Image(systemName: "info.circle")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("起始日期说明")
+            .popover(
+                isPresented: Binding(
+                    get: { startDateHelpType == type },
+                    set: { if !$0 { startDateHelpType = nil } }
+                )
+            ) {
+                InfoPopover(text: "早于此日期的数据不会同步；「重新回填历史」同样受此限制。留空为「不限」，可回填更早历史。")
+            }
+
+            Spacer()
+
+            Button {
+                editingStartType = type
+            } label: {
+                HStack(spacing: 4) {
+                    Text(stored.map { $0.formatted(date: .abbreviated, time: .omitted) } ?? "不限")
+                        .foregroundStyle(stored == nil ? .secondary : .primary)
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .buttonStyle(.plain)
+        }
+    }
 }
 
 // MARK: - 说明气泡
@@ -438,6 +495,63 @@ private struct InfoPopover: View {
             .padding(12)
             .frame(width: 260, alignment: .leading)
             .presentationCompactAdaptation(.popover)
+    }
+}
+
+// MARK: - 起始日期编辑面板
+
+/// 「起始日期」编辑面板：在「不限」与「指定日期」之间二选一，完成后回调（nil 表示不限）。
+private struct StartDateEditor: View {
+    enum Mode: Hashable {
+        case unlimited
+        case specific
+    }
+
+    let typeName: String
+    let onSave: (Date?) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var mode: Mode
+    @State private var date: Date
+
+    init(typeName: String, initial: Date?, onSave: @escaping (Date?) -> Void) {
+        self.typeName = typeName
+        self.onSave = onSave
+        _mode = State(initialValue: initial == nil ? .unlimited : .specific)
+        _date = State(initialValue: initial ?? Calendar.current.startOfDay(for: Date()))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Picker("模式", selection: $mode) {
+                        Text("不限").tag(Mode.unlimited)
+                        Text("指定日期").tag(Mode.specific)
+                    }
+                    .pickerStyle(.segmented)
+                } footer: {
+                    Text("「不限」表示不限制起始日期，可回填更早历史。")
+                }
+
+                if mode == .specific {
+                    DatePicker("起始日期", selection: $date, displayedComponents: .date)
+                }
+            }
+            .navigationTitle("\(typeName)·起始日期")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("取消") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") {
+                        onSave(mode == .specific ? date : nil)
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 }
 

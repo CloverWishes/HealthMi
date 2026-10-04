@@ -82,13 +82,15 @@ actor SyncEngine {
     ///   - highWater: 上次游标；`nil` 表示首次同步
     ///   - backfillDays: 回填天数（仅在无游标或 `forceBackfill` 时生效）
     ///   - forceBackfill: 为 true 时忽略游标，按 `backfillDays` 重新拉取历史
+    ///   - startFrom: 该类别的起始日期硬下界；非 nil 时不会拉取早于该日期的数据（增量和重新回填都适用）
     func sync(
         type: SyncDataType, highWater: Date?, backfillDays: Int,
-        forceBackfill: Bool = false
+        forceBackfill: Bool = false, startFrom: Date? = nil
     ) async throws -> SyncOutcome {
+        // 统一走 syncWindow：起始日作为硬下界，增量与重新回填都不早于它。
         let (start, now, startTime, endTime) = syncWindow(
             highWater: highWater, backfillDays: backfillDays,
-            forceBackfill: forceBackfill
+            forceBackfill: forceBackfill, startFrom: startFrom
         )
 
         // 运动记录用 HKWorkoutBuilder 单独写入（不走通用分组保存）
@@ -226,10 +228,11 @@ actor SyncEngine {
     /// 压力数据无 HealthKit 对应类型，由 AppModel 写入 SwiftData。
     /// - Returns: (压力样本列表, 同步结果摘要)
     func syncStress(
-        highWater: Date?, backfillDays: Int, forceBackfill: Bool = false
+        highWater: Date?, backfillDays: Int, forceBackfill: Bool = false, startFrom: Date? = nil
     ) async throws -> (samples: [MiStressSample], outcome: SyncOutcome) {
         let (start, now, startTime, endTime) = syncWindow(
-            highWater: highWater, backfillDays: backfillDays, forceBackfill: forceBackfill
+            highWater: highWater, backfillDays: backfillDays,
+            forceBackfill: forceBackfill, startFrom: startFrom
         )
         let items = try await client.fetchData(key: "stress", startTime: startTime, endTime: endTime)
         let samples = MiParser.stressSamples(items)
@@ -239,17 +242,19 @@ actor SyncEngine {
     // MARK: - 窗口计算
 
     func syncWindow(
-        highWater: Date?, backfillDays: Int, forceBackfill: Bool
+        highWater: Date?, backfillDays: Int, forceBackfill: Bool, startFrom: Date? = nil
     ) -> (start: Date, end: Date, startTime: Int, endTime: Int) {
         let now = Date()
-        let start: Date
+        let rawStart: Date
         if forceBackfill {
-            start = Calendar.current.date(byAdding: .day, value: -backfillDays, to: now) ?? now
+            rawStart = Calendar.current.date(byAdding: .day, value: -backfillDays, to: now) ?? now
         } else if let highWater {
-            start = Calendar.current.date(byAdding: .day, value: -overlapDays, to: highWater) ?? highWater
+            rawStart = Calendar.current.date(byAdding: .day, value: -overlapDays, to: highWater) ?? highWater
         } else {
-            start = Calendar.current.date(byAdding: .day, value: -backfillDays, to: now) ?? now
+            rawStart = Calendar.current.date(byAdding: .day, value: -backfillDays, to: now) ?? now
         }
+        // 起始日为硬下界：无论增量还是重新回填，都不早于该日期（nil 表示无下界）。
+        let start = startFrom.map { max(rawStart, $0) } ?? rawStart
         return (start, now, MiAPIClient.dayStartEpoch(of: start), MiAPIClient.dayEndEpoch(of: now))
     }
 

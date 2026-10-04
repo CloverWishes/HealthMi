@@ -96,3 +96,42 @@ enum SyncStateStore {
         }
     }
 }
+
+/// 每类同步数据的「起始日期」（可选）。按 `SyncDataType` 独立存储，互不影响。
+///
+/// 语义：设置后作为该类同步的时间下界——**增量与重新回填都不会拉取早于该日期的数据**；
+/// 未设置（nil）表示无下界，此时「重新回填」可补更早的历史。
+/// 存储于 UserDefaults（不改 SwiftData schema，避免迁移），值为当天 00:00 的时间戳。
+enum SyncStartStore {
+    private static func key(for type: SyncDataType) -> String {
+        "sync_start_day_\(type.rawValue)"
+    }
+
+    /// 读取该类别的起始日期；未设置返回 nil。
+    static func startDate(for type: SyncDataType) -> Date? {
+        let timestamp = UserDefaults.standard.double(forKey: key(for: type))
+        guard timestamp > 0 else { return nil }
+        return Date(timeIntervalSince1970: timestamp)
+    }
+
+    /// 设置起始日期（自动归一到当天 00:00）；传 nil 表示清除（无下界）。
+    static func setStartDate(_ date: Date?, for type: SyncDataType) {
+        let defaults = UserDefaults.standard
+        if let date {
+            defaults.set(
+                Calendar.current.startOfDay(for: date).timeIntervalSince1970,
+                forKey: key(for: type)
+            )
+        } else {
+            defaults.removeObject(forKey: key(for: type))
+        }
+    }
+
+    /// 清除所有类别的起始日期（退出登录或切换账号时调用，与游标保持一致）。
+    static func clearAll() {
+        let defaults = UserDefaults.standard
+        for type in SyncDataType.allCases {
+            defaults.removeObject(forKey: key(for: type))
+        }
+    }
+}

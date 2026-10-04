@@ -48,6 +48,9 @@ final class AppModel {
     /// 已启用的同步类别（持久化到 UserDefaults，默认全部启用）。
     var enabledTypes: Set<SyncDataType> = Set(SyncDataType.allCases)
 
+    /// 各类别已设置的起始日期（无键 = 不限）。与 `SyncStartStore` 同步，作为可观察状态供界面刷新。
+    var startDates: [SyncDataType: Date] = [:]
+
     private var engine: SyncEngine?
 
     // MARK: - 初始化 / 凭据
@@ -55,6 +58,7 @@ final class AppModel {
     func bootstrap() {
         CredentialStore.migrateIfNeeded()
         loadEnabledTypes()
+        loadStartDates()
         if let cred = CredentialStore.load() {
             isConfigured = true
             accountID = mask(cred.userId)
@@ -92,6 +96,26 @@ final class AppModel {
         }
     }
 
+    // MARK: - 每类起始日期
+
+    /// 从持久化存储加载各类起始日期（无键 = 不限）。
+    private func loadStartDates() {
+        startDates = SyncDataType.allCases.reduce(into: [:]) { result, type in
+            result[type] = SyncStartStore.startDate(for: type)
+        }
+    }
+
+    /// 某类别的起始日期；nil 表示不限（可回填更早历史）。
+    func startDate(for type: SyncDataType) -> Date? {
+        startDates[type]
+    }
+
+    /// 设置某类别的起始日期（nil 表示清除）。
+    func setStartDate(_ date: Date?, for type: SyncDataType) {
+        SyncStartStore.setStartDate(date, for: type)
+        startDates[type] = date.map { Calendar.current.startOfDay(for: $0) }
+    }
+
     func saveCredentials(userId: String, passToken: String) async throws {
         try CredentialStore.save(userId: userId, passToken: passToken)
         let engine = SyncEngine()
@@ -111,6 +135,9 @@ final class AppModel {
         connected = false
         accountID = ""
         outcomes = [:]
+        // 清除每类起始日期（与游标一致，防止切换账号时新账号继承旧设置）
+        SyncStartStore.clearAll()
+        startDates = [:]
         // 清除同步游标和压力记录，防止切换账号时新账号继承上一个账号的数据
         if let modelContext {
             SyncStateStore.clearAll(in: modelContext)
@@ -198,12 +225,17 @@ final class AppModel {
             // 后台同步被系统取消时，尽早退出
             if Task.isCancelled { break }
             let highWater = SyncStateStore.state(for: type, in: modelContext)?.lastSyncedEnd
+            // 首次同步（无游标）且未设置起始日时，自动以“首次同步当天”为起始日，避免回填历史。
+            if highWater == nil, startDates[type] == nil {
+                setStartDate(Date(), for: type)
+            }
+            let startFrom = startDates[type]
             do {
                 if type == .stress {
                     // 压力数据不走 HealthKit，走 SwiftData
                     let result = try await engine?.syncStress(
                         highWater: highWater, backfillDays: backfillDays,
-                        forceBackfill: forceBackfill
+                        forceBackfill: forceBackfill, startFrom: startFrom
                     )
                     if let result {
                         if forceBackfill {
@@ -228,7 +260,7 @@ final class AppModel {
                 } else {
                     let outcome = try await engine?.sync(
                         type: type, highWater: highWater, backfillDays: backfillDays,
-                        forceBackfill: forceBackfill
+                        forceBackfill: forceBackfill, startFrom: startFrom
                     )
                     if let outcome {
                         SyncStateStore.record(

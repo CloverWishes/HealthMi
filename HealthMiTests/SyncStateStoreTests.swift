@@ -13,6 +13,12 @@ final class SyncStateStoreTests: XCTestCase {
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         container = try! ModelContainer(for: schema, configurations: [config])
         context = container.mainContext
+        SyncStartStore.clearAll()
+    }
+
+    override func tearDown() {
+        SyncStartStore.clearAll()
+        super.tearDown()
     }
 
     func testRecordUpdatesState() {
@@ -45,5 +51,41 @@ final class SyncStateStoreTests: XCTestCase {
 
         let state = SyncStateStore.state(for: type, in: context)
         XCTAssertEqual(state?.lastAddedCount, 20)
+    }
+
+    // MARK: - SyncStartStore
+
+    func testStartDateRoundTripIsPerType() {
+        XCTAssertNil(SyncStartStore.startDate(for: .heartRate))
+        let date = Date(timeIntervalSince1970: 1_700_000_000)
+        SyncStartStore.setStartDate(date, for: .heartRate)
+
+        let stored = SyncStartStore.startDate(for: .heartRate)
+        XCTAssertNotNil(stored)
+        // 应归一到当天 00:00
+        XCTAssertEqual(
+            stored!.timeIntervalSince(Calendar.current.startOfDay(for: date)), 0, accuracy: 1
+        )
+        // 其它类别不受影响
+        XCTAssertNil(SyncStartStore.startDate(for: .sleep))
+    }
+
+    func testClearStartDateRemovesIt() {
+        SyncStartStore.setStartDate(Date(), for: .sleep)
+        XCTAssertNotNil(SyncStartStore.startDate(for: .sleep))
+
+        SyncStartStore.setStartDate(nil, for: .sleep)
+        XCTAssertNil(SyncStartStore.startDate(for: .sleep))
+    }
+
+    func testClearAllStartDates() {
+        SyncStartStore.setStartDate(Date(), for: .heartRate)
+        SyncStartStore.setStartDate(Date(), for: .sleep)
+
+        SyncStartStore.clearAll()
+
+        for type in SyncDataType.allCases {
+            XCTAssertNil(SyncStartStore.startDate(for: type))
+        }
     }
 }
