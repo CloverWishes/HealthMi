@@ -23,9 +23,6 @@ struct RootView: View {
 ///
 /// iOS 26 起系统 Tab 栏自动使用液态玻璃（Liquid Glass）外观；更低系统版本自动回退为普通样式。
 struct MainTabView: View {
-    @Environment(AppModel.self) private var model
-    @Environment(\.modelContext) private var modelContext
-
     @State private var selection: MainTab = .sync
 
     enum MainTab: Hashable {
@@ -34,14 +31,6 @@ struct MainTabView: View {
 
     var body: some View {
         tabs
-            .task {
-                // 快捷指令 / Siri 触发：切到「同步」页并立即同步
-                if SyncIntentTrigger.shouldSync {
-                    SyncIntentTrigger.shouldSync = false
-                    selection = .sync
-                    await model.syncAll(modelContext: modelContext)
-                }
-            }
     }
 
     /// iOS 26 起可声明 Tab 栏收缩行为：这里设为永不收缩，保持始终完整显示。
