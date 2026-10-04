@@ -3,6 +3,7 @@ import SwiftUI
 
 /// 同步历史日志页面。
 struct SyncHistoryView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \SyncLogEntry.timestamp, order: .reverse) private var entries: [SyncLogEntry]
 
     var body: some View {
@@ -13,9 +14,18 @@ struct SyncHistoryView: View {
                 ForEach(entries, id: \.persistentModelID) { entry in
                     logRow(entry)
                 }
+                .onDelete(perform: deleteEntries)
             }
         }
         .navigationTitle("同步历史")
+    }
+
+    /// 左滑删除单条记录。
+    private func deleteEntries(at offsets: IndexSet) {
+        for index in offsets {
+            modelContext.delete(entries[index])
+        }
+        try? modelContext.save()
     }
 
     private func logRow(_ entry: SyncLogEntry) -> some View {

@@ -51,40 +51,40 @@ struct TrendChartView: View {
     }
 }
 
-/// 7 天趋势图表区域。
+/// 7 天趋势图表区域。只渲染有数据的类别，避免出现空白占位。
 struct TrendChartsSection: View {
     @Environment(AppModel.self) private var model
 
+    private var stepValues: [(date: Date, value: Double)] {
+        model.trends.compactMap { t in t.stepCount.map { (date: t.date, value: $0) } }
+    }
+
+    private var heartRateValues: [(date: Date, value: Double)] {
+        model.trends.compactMap { t in t.avgHeartRate.map { (date: t.date, value: $0) } }
+    }
+
+    private var sleepValues: [(date: Date, value: Double)] {
+        model.trends.compactMap { t in t.sleepMinutes.map { (date: t.date, value: $0) } }
+    }
+
+    private var hrvValues: [(date: Date, value: Double)] {
+        model.trends.compactMap { t in t.avgHRV.map { (date: t.date, value: $0) } }
+    }
+
     var body: some View {
         VStack(spacing: 16) {
-            TrendChartView(
-                title: "步数", unit: "步",
-                values: model.trends.compactMap { t in
-                    guard let s = t.stepCount else { return nil }
-                    return (t.date, s)
-                }
-            )
-            TrendChartView(
-                title: "心率", unit: "bpm",
-                values: model.trends.compactMap { t in
-                    guard let hr = t.avgHeartRate else { return nil }
-                    return (t.date, hr)
-                }
-            )
-            TrendChartView(
-                title: "睡眠", unit: "分钟",
-                values: model.trends.compactMap { t in
-                    guard let s = t.sleepMinutes else { return nil }
-                    return (t.date, s)
-                }
-            )
-            TrendChartView(
-                title: "HRV", unit: "ms",
-                values: model.trends.compactMap { t in
-                    guard let h = t.avgHRV else { return nil }
-                    return (t.date, h)
-                }
-            )
+            if !stepValues.isEmpty {
+                TrendChartView(title: "步数", unit: "步", values: stepValues)
+            }
+            if !heartRateValues.isEmpty {
+                TrendChartView(title: "心率", unit: "bpm", values: heartRateValues)
+            }
+            if !sleepValues.isEmpty {
+                TrendChartView(title: "睡眠", unit: "分钟", values: sleepValues)
+            }
+            if !hrvValues.isEmpty {
+                TrendChartView(title: "HRV", unit: "ms", values: hrvValues)
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ struct SyncHealthDataIntent: AppIntent {
     }
 }
 
-/// App Intent 触发标记，DashboardView 启动时检查。
+/// App Intent 触发标记，MainTabView 启动时检查。
 enum SyncIntentTrigger {
     nonisolated(unsafe) static var shouldSync = false
 }
